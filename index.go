@@ -7,7 +7,7 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2/feature"
 	wof_index "github.com/whosonfirst/go-whosonfirst-index"
 	"github.com/whosonfirst/go-whosonfirst-sqlite"
-	sql_index "github.com/whosonfirst/go-whosonfirst-sqlite/index"
+	sql_index "github.com/whosonfirst/go-whosonfirst-sqlite-index"
 	"github.com/whosonfirst/warning"
 	"io"
 	"io/ioutil"
