@@ -30,9 +30,11 @@ func NewDefaultSQLiteFeaturesIndexer(db sqlite.Database, to_index []sqlite.Table
 
 			closer := ioutil.NopCloser(fh)
 
-			// i, err := feature.LoadWOFFeatureFromReader(closer)
+			i, err := feature.LoadWOFFeatureFromReader(closer)
 
-			i, err := feature.LoadGeoJSONFeatureFromReader(closer)
+			// because this:
+			// https://github.com/whosonfirst/go-whosonfirst-dist/issues/14
+			// i, err := feature.LoadGeoJSONFeatureFromReader(closer)
 
 			if err != nil && !warning.IsWarning(err) {
 				msg := fmt.Sprintf("Unable to load %s, because %s", path, err)
