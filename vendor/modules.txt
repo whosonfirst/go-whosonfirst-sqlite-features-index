@@ -40,6 +40,7 @@ github.com/whosonfirst/go-whosonfirst-geojson-v2/utils
 github.com/whosonfirst/go-whosonfirst-hash
 # github.com/whosonfirst/go-whosonfirst-index v0.1.2
 github.com/whosonfirst/go-whosonfirst-index
+github.com/whosonfirst/go-whosonfirst-index/utils
 # github.com/whosonfirst/go-whosonfirst-log v0.1.0
 github.com/whosonfirst/go-whosonfirst-log
 # github.com/whosonfirst/go-whosonfirst-names v0.1.0
