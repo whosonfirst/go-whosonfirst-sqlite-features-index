@@ -4,8 +4,8 @@ import (
 	"flag"
 	"fmt"
 	wof_index "github.com/whosonfirst/go-whosonfirst-index"
+	_ "github.com/whosonfirst/go-whosonfirst-index-csv"
 	_ "github.com/whosonfirst/go-whosonfirst-index-sqlite"
-	_ "github.com/whosonfirst/go-whosonfirst-index-csv"		
 	log "github.com/whosonfirst/go-whosonfirst-log"
 	"github.com/whosonfirst/go-whosonfirst-sqlite"
 	"github.com/whosonfirst/go-whosonfirst-sqlite-features-index"
@@ -39,6 +39,9 @@ func main() {
 	timings := flag.Bool("timings", false, "Display timings during and after indexing")
 	optimize := flag.Bool("optimize", true, "Attempt to optimize the database before closing connection")
 	// liberal := flag.Bool("liberal", false, "Do not trigger errors for records that can not be processed, for whatever reason")
+
+	alt_files := flag.Bool("index-alt-files", false, "Index alt geometries")
+
 	var procs = flag.Int("processes", (runtime.NumCPU() * 2), "The number of concurrent processes to index data with")
 
 	flag.Parse()
@@ -94,7 +97,15 @@ func main() {
 
 	if *geojson || *all {
 
-		gt, err := tables.NewGeoJSONTableWithDatabase(db)
+		opts, err := tables.DefaultGeoJSONTableOptions()
+
+		if err != nil {
+			logger.Fatal("failed to create 'geojson' table because %s", err)
+		}
+
+		opts.IndexAltFiles = *alt_files
+
+		gt, err := tables.NewGeoJSONTableWithDatabaseAndOptions(db, opts)
 
 		if err != nil {
 			logger.Fatal("failed to create 'geojson' table because %s", err)

@@ -30,8 +30,10 @@ func NewDefaultSQLiteFeaturesIndexer(db sqlite.Database, to_index []sqlite.Table
 				return nil, err
 			}
 
-			// skip alt files - see below for details
-			// (20190821/thisisaaronland)
+			// TO DO ... something something something allow alt files?
+			// https://github.com/whosonfirst/go-whosonfirst-sqlite-features/blob/master/tables/geojson.go
+			// https://github.com/whosonfirst/go-whosonfirst-sqlite-features-index/blob/master/cmd/wof-sqlite-index-features/main.go#L97
+			// https://github.com/whosonfirst/go-whosonfirst-sqlite-features/blob/master/tables/geojson.go#L48
 
 			ok, err := wof_utils.IsPrincipalWOFRecord(fh, ctx)
 
