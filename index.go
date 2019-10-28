@@ -31,6 +31,7 @@ func NewDefaultSQLiteFeaturesIndexer(db sqlite.Database, to_index []sqlite.Table
 			}
 
 			// TO DO ... something something something allow alt files?
+			// depends on this: https://github.com/whosonfirst/go-whosonfirst-sqlite-features/tree/alt
 			// https://github.com/whosonfirst/go-whosonfirst-sqlite-features/blob/master/tables/geojson.go
 			// https://github.com/whosonfirst/go-whosonfirst-sqlite-features-index/blob/master/cmd/wof-sqlite-index-features/main.go#L97
 			// https://github.com/whosonfirst/go-whosonfirst-sqlite-features/blob/master/tables/geojson.go#L48
