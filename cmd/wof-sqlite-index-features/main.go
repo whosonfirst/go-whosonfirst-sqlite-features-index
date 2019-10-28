@@ -4,6 +4,8 @@ import (
 	"flag"
 	"fmt"
 	wof_index "github.com/whosonfirst/go-whosonfirst-index"
+	_ "github.com/whosonfirst/go-whosonfirst-index-sqlite"
+	_ "github.com/whosonfirst/go-whosonfirst-index-csv"		
 	log "github.com/whosonfirst/go-whosonfirst-log"
 	"github.com/whosonfirst/go-whosonfirst-sqlite"
 	"github.com/whosonfirst/go-whosonfirst-sqlite-features-index"
