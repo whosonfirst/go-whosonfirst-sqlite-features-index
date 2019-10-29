@@ -9,7 +9,7 @@ require (
 	github.com/whosonfirst/go-whosonfirst-index-sqlite v0.0.2
 	github.com/whosonfirst/go-whosonfirst-log v0.1.0
 	github.com/whosonfirst/go-whosonfirst-sqlite v0.1.4
-	github.com/whosonfirst/go-whosonfirst-sqlite-features v0.2.2
+	github.com/whosonfirst/go-whosonfirst-sqlite-features v0.2.4
 	github.com/whosonfirst/go-whosonfirst-sqlite-index v0.1.0
 	github.com/whosonfirst/warning v0.1.0
 )

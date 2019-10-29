@@ -48,6 +48,8 @@ func NewDefaultSQLiteFeaturesIndexer(db sqlite.Database, to_index []sqlite.Table
 
 			closer := ioutil.NopCloser(fh)
 
+			// this will probably trigger an error for alt files?
+			
 			i, err := feature.LoadWOFFeatureFromReader(closer)
 
 			// because this:

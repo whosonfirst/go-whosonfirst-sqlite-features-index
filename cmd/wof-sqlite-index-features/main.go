@@ -97,15 +97,15 @@ func main() {
 
 	if *geojson || *all {
 
-		opts, err := tables.DefaultGeoJSONTableOptions()
+		geojson_opts, err := tables.DefaultGeoJSONTableOptions()
 
 		if err != nil {
-			logger.Fatal("failed to create 'geojson' table because %s", err)
+			logger.Fatal("failed to create 'geojson' table options because %s", err)
 		}
 
-		opts.IndexAltFiles = *alt_files
+		geojson_opts.IndexAltFiles = *alt_files
 
-		gt, err := tables.NewGeoJSONTableWithDatabaseAndOptions(db, opts)
+		gt, err := tables.NewGeoJSONTableWithDatabaseAndOptions(db, geojson_opts)
 
 		if err != nil {
 			logger.Fatal("failed to create 'geojson' table because %s", err)
@@ -163,7 +163,15 @@ func main() {
 
 	if *geometries {
 
-		gm, err := tables.NewGeometriesTableWithDatabase(db)
+		geometries_opts, err := tables.DefaultGeometriesTableOptions()
+
+		if err != nil {
+			logger.Fatal("failed to create 'geometries' table options because %s", err)
+		}
+
+		geometries_opts.IndexAltFiles = *alt_files
+
+		gm, err := tables.NewGeometriesTableWithDatabaseAndOptions(db, geometries_opts)
 
 		if err != nil {
 			logger.Fatal("failed to create 'geometries' table because %s", err)
