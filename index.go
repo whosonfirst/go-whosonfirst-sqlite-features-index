@@ -32,6 +32,11 @@ func NewDefaultSQLiteFeaturesIndexer(db sqlite.Database, to_index []sqlite.Table
 
 			closer := ioutil.NopCloser(fh)
 
+			// blocked on support for loading/handling alt files in go-whosonfirst-geojson-v2
+			// (as in alt files will always fail to load...)
+			// https://github.com/whosonfirst/go-whosonfirst-geojson-v2/compare/alt
+			// (20191029/thisisaaronland)
+			
 			i, err := feature.LoadWOFFeatureFromReader(closer)
 
 			log.Println(path, err)
