@@ -11,7 +11,7 @@ import (
 	"github.com/whosonfirst/warning"
 	"io"
 	"io/ioutil"
-	"log"
+	_ "log"
 )
 
 func NewDefaultSQLiteFeaturesIndexer(db sqlite.Database, to_index []sqlite.Table) (*sql_index.SQLiteIndexer, error) {
@@ -30,20 +30,24 @@ func NewDefaultSQLiteFeaturesIndexer(db sqlite.Database, to_index []sqlite.Table
 				return nil, err
 			}
 
-			closer := ioutil.NopCloser(fh)
+			body, err := ioutil.ReadAll(fh)
 
-			// blocked on support for loading/handling alt files in go-whosonfirst-geojson-v2
-			// (as in alt files will always fail to load...)
-			// https://github.com/whosonfirst/go-whosonfirst-geojson-v2/compare/alt
-			// (20191029/thisisaaronland)
-			
-			i, err := feature.LoadWOFFeatureFromReader(closer)
+			if err != nil {
+				return nil, err
+			}
 
-			log.Println(path, err)
+			i, err := feature.NewWOFFeature(body)
 
 			if err != nil && !warning.IsWarning(err) {
-				msg := fmt.Sprintf("Unable to load %s, because %s", path, err)
-				return nil, errors.New(msg)
+
+				alt, alt_err := feature.NewWOFAltFeature(body)
+
+				if alt_err != nil && !warning.IsWarning(alt_err) {
+					msg := fmt.Sprintf("Unable to load %s, because %s (%s)", path, alt_err, err)
+					return nil, errors.New(msg)
+				}
+
+				i = alt
 			}
 
 			return i, nil
