@@ -39,9 +39,9 @@ func main() {
 	live_hard := flag.Bool("live-hard-die-fast", true, "Enable various performance-related pragmas at the expense of possible (unlikely) database corruption")
 	timings := flag.Bool("timings", false, "Display timings during and after indexing")
 	optimize := flag.Bool("optimize", true, "Attempt to optimize the database before closing connection")
-	// liberal := flag.Bool("liberal", false, "Do not trigger errors for records that can not be processed, for whatever reason")
 
 	alt_files := flag.Bool("index-alt-files", false, "Index alt geometries")
+	strict_alt_files := flag.Bool("strict-alt-files", true, "Be strict when indexing alt geometries")
 
 	var procs = flag.Int("processes", (runtime.NumCPU() * 2), "The number of concurrent processes to index data with")
 
@@ -200,7 +200,12 @@ func main() {
 		logger.Fatal("You forgot to specify which (any) tables to index")
 	}
 
-	idx, err := index.NewDefaultSQLiteFeaturesIndexer(db, to_index)
+	opts := index.DefaultSQLiteFeaturesIndexerCallbackOptions()
+	opts.StrictAltFiles = *strict_alt_files
+
+	cb := index.SQLiteFeaturesIndexerCallback(opts)
+
+	idx, err := index.NewSQLiteFeaturesIndexerWithCallback(db, to_index, cb)
 
 	if err != nil {
 		logger.Fatal("failed to create sqlite indexer because %s", err)

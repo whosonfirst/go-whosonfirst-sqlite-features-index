@@ -125,7 +125,7 @@ func (idx *SQLiteIndexer) IndexPaths(mode string, paths []string) error {
 	}
 
 	if idx.Timings {
-
+		
 		go func() {
 
 			for {
@@ -133,7 +133,7 @@ func (idx *SQLiteIndexer) IndexPaths(mode string, paths []string) error {
 				select {
 				case <-done_ch:
 					return
-				case <-time.After(1 * time.Minute):
+				case <-time.After(1 * time.Minute):	
 					show_timings()
 				}
 			}
