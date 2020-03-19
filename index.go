@@ -150,6 +150,7 @@ func SQLiteFeaturesIndexRelationsFunc(r reader.Reader) sql_index.SQLiteIndexerPo
 			to_index = append(to_index, ancestor)
 
 			// TO DO: CHECK WHETHER TO INDEX ALT FILES FOR ANCESTOR(S)
+			// https://github.com/whosonfirst/go-whosonfirst-sqlite-features-index/issues/3
 		}
 
 		for _, record := range to_index {
