@@ -112,16 +112,19 @@ func SQLiteFeaturesIndexBelongsToFunc(r reader.Reader) sql_index.SQLiteIndexerPo
 				return err
 			}
 
-			if count == 0 {
-
-				ancestor, err := wof_reader.LoadFeatureFromID(ctx, r, id)
-
-				if err != nil {
-					return err
-				}
-
-				to_index = append(to_index, ancestor)
+			if count != 0 {
+				continue
 			}
+
+			ancestor, err := wof_reader.LoadFeatureFromID(ctx, r, id)
+
+			if err != nil {
+				return err
+			}
+
+			to_index = append(to_index, ancestor)
+
+			// TO DO: CHECK WHETHER TO INDEX ALT FILES FOR ANCESTOR(S)
 		}
 
 		for _, record := range to_index {

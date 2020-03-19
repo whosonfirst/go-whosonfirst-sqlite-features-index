@@ -50,8 +50,8 @@ func main() {
 	alt_files := flag.Bool("index-alt-files", false, "Index alt geometries")
 	strict_alt_files := flag.Bool("strict-alt-files", true, "Be strict when indexing alt geometries")
 
-	index_belongs_to := flag.Bool("index-belongs-to", false, "...")
-	belongs_to_uri := flag.String("belongs-to-uri", "", "...")
+	index_belongs_to := flag.Bool("index-belongs-to", false, "Index the records listed in a feature's 'wof:belongsto' array. Alt files for 'wof:belongsto' are not indexed at this time.")
+	belongs_to_uri := flag.String("index-belongs-to-uri", "", "A valid go-reader.Reader URI from which to read data for a 'wof:belongsto' candidate.")
 
 	var procs = flag.Int("processes", (runtime.NumCPU() * 2), "The number of concurrent processes to index data with")
 
@@ -217,8 +217,8 @@ func main() {
 	record_func := index.SQLiteFeaturesLoadRecordFunc(record_opts)
 
 	idx_opts := &sql_index.SQLiteIndexerOptions{
-		DB:         db,
-		Tables:     to_index,
+		DB:             db,
+		Tables:         to_index,
 		LoadRecordFunc: record_func,
 	}
 
