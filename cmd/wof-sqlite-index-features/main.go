@@ -50,7 +50,7 @@ func main() {
 	alt_files := flag.Bool("index-alt-files", false, "Index alt geometries")
 	strict_alt_files := flag.Bool("strict-alt-files", true, "Be strict when indexing alt geometries")
 
-	index_relations := flag.Bool("index-relations", false, "Index the records related to a feature. Alt files for relations are not indexed at this time.")
+	index_relations := flag.Bool("index-relations", false, "Index the records related to a feature, specifically wof:belongsto, wof:depicts and wof:involves. Alt files for relations are not indexed at this time.")
 	relations_uri := flag.String("index-relations-reader-uri", "", "A valid go-reader.Reader URI from which to read data for a relations candidate.")
 
 	var procs = flag.Int("processes", (runtime.NumCPU() * 2), "The number of concurrent processes to index data with")

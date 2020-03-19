@@ -109,14 +109,19 @@ func SQLiteFeaturesIndexRelationsFunc(r reader.Reader) sql_index.SQLiteIndexerPo
 
 		for _, path := range candidates {
 
+			// log.Println("RELATIONS", path)
+
 			rsp := gjson.GetBytes(body, path)
 
 			if !rsp.Exists() {
+				// log.Println("MISSING", path)
 				continue
 			}
 
 			for _, r := range rsp.Array() {
-				relations[r.Int()] = true
+				id := r.Int()
+				relations[id] = true
+				// log.Println("MATCH", path, id)
 			}
 		}
 
