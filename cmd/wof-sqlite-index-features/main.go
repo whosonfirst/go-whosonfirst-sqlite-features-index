@@ -1,16 +1,23 @@
 package main
 
 import (
-	"flag"
-	"fmt"
-	wof_index "github.com/whosonfirst/go-whosonfirst-index"
+	_ "github.com/whosonfirst/go-reader-http"
 	_ "github.com/whosonfirst/go-whosonfirst-index-csv"
 	_ "github.com/whosonfirst/go-whosonfirst-index-sqlite"
 	_ "github.com/whosonfirst/go-whosonfirst-index/fs"
+)
+
+import (
+	"context"
+	"flag"
+	"fmt"
+	"github.com/whosonfirst/go-reader"
+	wof_index "github.com/whosonfirst/go-whosonfirst-index"
 	log "github.com/whosonfirst/go-whosonfirst-log"
 	"github.com/whosonfirst/go-whosonfirst-sqlite"
 	"github.com/whosonfirst/go-whosonfirst-sqlite-features-index"
 	"github.com/whosonfirst/go-whosonfirst-sqlite-features/tables"
+	sql_index "github.com/whosonfirst/go-whosonfirst-sqlite-index"
 	"github.com/whosonfirst/go-whosonfirst-sqlite/database"
 	"io"
 	"os"
@@ -42,6 +49,9 @@ func main() {
 
 	alt_files := flag.Bool("index-alt-files", false, "Index alt geometries")
 	strict_alt_files := flag.Bool("strict-alt-files", true, "Be strict when indexing alt geometries")
+
+	index_belongs_to := flag.Bool("index-belongs-to", false, "...")
+	belongs_to_uri := flag.String("belongs-to-uri", "", "...")
 
 	var procs = flag.Int("processes", (runtime.NumCPU() * 2), "The number of concurrent processes to index data with")
 
@@ -200,12 +210,32 @@ func main() {
 		logger.Fatal("You forgot to specify which (any) tables to index")
 	}
 
-	opts := index.DefaultSQLiteFeaturesIndexerCallbackOptions()
-	opts.StrictAltFiles = *strict_alt_files
+	record_opts := &index.SQLiteFeaturesLoadRecordFuncOptions{
+		StrictAltFiles: *strict_alt_files,
+	}
 
-	cb := index.SQLiteFeaturesIndexerCallback(opts)
+	record_func := index.SQLiteFeaturesLoadRecordFunc(record_opts)
 
-	idx, err := index.NewSQLiteFeaturesIndexerWithCallback(db, to_index, cb)
+	idx_opts := &sql_index.SQLiteIndexerOptions{
+		DB:         db,
+		Tables:     to_index,
+		LoadRecordFunc: record_func,
+	}
+
+	if *index_belongs_to {
+
+		ctx := context.Background()
+		r, err := reader.NewReader(ctx, *belongs_to_uri)
+
+		if err != nil {
+			logger.Fatal("Failed to load reader (%s), %v", *belongs_to_uri, err)
+		}
+
+		belongsto_func := index.SQLiteFeaturesIndexBelongsToFunc(r)
+		idx_opts.PostIndexFunc = belongsto_func
+	}
+
+	idx, err := sql_index.NewSQLiteIndexer(idx_opts)
 
 	if err != nil {
 		logger.Fatal("failed to create sqlite indexer because %s", err)
