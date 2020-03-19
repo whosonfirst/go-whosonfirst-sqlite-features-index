@@ -464,11 +464,13 @@ func ParseBytes(json []byte) Result {
 }
 
 func squash(json string) string {
-	// expects that the lead character is a '[' or '{' or '('
+	// expects that the lead character is a '[' or '{' or '(' or '"'
 	// squash the value, ignoring all nested arrays and objects.
-	// the first '[' or '{' or '(', has already been read
-	depth := 1
-	for i := 1; i < len(json); i++ {
+	var i, depth int
+	if json[0] != '"' {
+		i, depth = 1, 1
+	}
+	for ; i < len(json); i++ {
 		if json[i] >= '"' && json[i] <= '}' {
 			switch json[i] {
 			case '"':
@@ -494,6 +496,9 @@ func squash(json string) string {
 						}
 						break
 					}
+				}
+				if depth == 0 {
+					return json[:i+1]
 				}
 			case '{', '[', '(':
 				depth++
@@ -1984,7 +1989,7 @@ func runeit(json string) rune {
 }
 
 // unescape unescapes a string
-func unescape(json string) string { //, error) {
+func unescape(json string) string {
 	var str = make([]byte, 0, len(json))
 	for i := 0; i < len(json); i++ {
 		switch {
@@ -2713,7 +2718,7 @@ func execModifier(json, path string) (pathOut, res string, ok bool) {
 			case '{', '[', '"':
 				res := Parse(pathOut)
 				if res.Exists() {
-					_, args = parseSquash(pathOut, 0)
+					args = squash(pathOut)
 					pathOut = pathOut[len(args):]
 					parsedArgs = true
 				}
@@ -2741,6 +2746,7 @@ var modifiers = map[string]func(json, arg string) string{
 	"pretty":  modPretty,
 	"ugly":    modUgly,
 	"reverse": modReverse,
+	"this":    modThis,
 }
 
 // AddModifier binds a custom modifier command to the GJSON syntax.
@@ -2776,6 +2782,11 @@ func modPretty(json, arg string) string {
 		return bytesString(pretty.PrettyOptions(stringBytes(json), &opts))
 	}
 	return bytesString(pretty.Pretty(stringBytes(json)))
+}
+
+// @this returns the current element. Can be used to retrieve the root element.
+func modThis(json, arg string) string {
+	return json
 }
 
 // @ugly modifier removes all whitespace.

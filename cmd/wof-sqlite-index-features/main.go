@@ -50,8 +50,8 @@ func main() {
 	alt_files := flag.Bool("index-alt-files", false, "Index alt geometries")
 	strict_alt_files := flag.Bool("strict-alt-files", true, "Be strict when indexing alt geometries")
 
-	index_belongs_to := flag.Bool("index-belongs-to", false, "Index the records listed in a feature's 'wof:belongsto' array. Alt files for 'wof:belongsto' are not indexed at this time.")
-	belongs_to_uri := flag.String("index-belongs-to-uri", "", "A valid go-reader.Reader URI from which to read data for a 'wof:belongsto' candidate.")
+	index_relations := flag.Bool("index-relations", false, "Index the records related to a feature. Alt files for relations are not indexed at this time.")
+	relations_uri := flag.String("index-relations-reader-uri", "", "A valid go-reader.Reader URI from which to read data for a relations candidate.")
 
 	var procs = flag.Int("processes", (runtime.NumCPU() * 2), "The number of concurrent processes to index data with")
 
@@ -222,16 +222,16 @@ func main() {
 		LoadRecordFunc: record_func,
 	}
 
-	if *index_belongs_to {
+	if *index_relations {
 
 		ctx := context.Background()
-		r, err := reader.NewReader(ctx, *belongs_to_uri)
+		r, err := reader.NewReader(ctx, *relations_uri)
 
 		if err != nil {
-			logger.Fatal("Failed to load reader (%s), %v", *belongs_to_uri, err)
+			logger.Fatal("Failed to load reader (%s), %v", *relations_uri, err)
 		}
 
-		belongsto_func := index.SQLiteFeaturesIndexBelongsToFunc(r)
+		belongsto_func := index.SQLiteFeaturesIndexRelationsFunc(r)
 		idx_opts.PostIndexFunc = belongsto_func
 	}
 
