@@ -41,6 +41,7 @@ func main() {
 	geojson := flag.Bool("geojson", false, "Index the 'geojson' table")
 	geometries := flag.Bool("geometries", false, "Index the 'geometries' table (requires that libspatialite already be installed)")
 	names := flag.Bool("names", false, "Index the 'names' table")
+	rtree := flag.Bool("rtree", false, "Index the 'rtree' table")	
 	search := flag.Bool("search", false, "Index the 'search' table (using SQLite FTS4 full-text indexer)")
 	spr := flag.Bool("spr", false, "Index the 'spr' table")
 	live_hard := flag.Bool("live-hard-die-fast", true, "Enable various performance-related pragmas at the expense of possible (unlikely) database corruption")
@@ -125,6 +126,25 @@ func main() {
 		to_index = append(to_index, gt)
 	}
 
+	if *rtree || *all {
+
+		rtree_opts, err := tables.DefaultRTreeTableOptions()
+
+		if err != nil {
+			logger.Fatal("failed to create 'rtree' table options because %s", err)
+		}
+
+		rtree_opts.IndexAltFiles = *alt_files
+
+		gt, err := tables.NewRTreeTableWithDatabaseAndOptions(db, rtree_opts)
+
+		if err != nil {
+			logger.Fatal("failed to create 'rtree' table because %s", err)
+		}
+
+		to_index = append(to_index, gt)
+	}
+	
 	if *spr || *all {
 
 		st, err := tables.NewSPRTableWithDatabase(db)
