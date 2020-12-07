@@ -103,11 +103,9 @@ func (t *RTreeTable) Schema() string {
 		max_x REAL,
 		max_y REAL,
 		lastmodified INTEGER
-	);
+	);`
 
-	CREATE INDEX rtree_by_lastmod ON %s (lastmodified);`
-
-	return fmt.Sprintf(sql, t.Name(), t.Name(), t.Name(), t.Name())
+	return fmt.Sprintf(sql, t.Name())
 }
 
 func (t *RTreeTable) InitializeTable(db sqlite.Database) error {
