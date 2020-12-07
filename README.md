@@ -37,6 +37,8 @@ Go package for indexing Who's On First features in SQLite databases.
     	Attempt to optimize the database before closing connection (default true)
   -processes int
     	The number of concurrent processes to index data with (default 8)
+  -rtree
+    	Index the 'rtree' table	
   -search
     	Index the 'search' table (using SQLite FTS4 full-text indexer)
   -spr
