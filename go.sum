@@ -199,6 +199,8 @@ github.com/whosonfirst/go-whosonfirst-sqlite-features v0.2.6 h1:uPvnvC3bnmVWxu8z
 github.com/whosonfirst/go-whosonfirst-sqlite-features v0.2.6/go.mod h1:C+ARiF6KebUj77c+pAawXtMf5028285Qg50FHUj5ou8=
 github.com/whosonfirst/go-whosonfirst-sqlite-features v0.2.7 h1:S3H+n72XkWrLyK33IFEwnKb0yoy+xe0QIUBiOwA/bKw=
 github.com/whosonfirst/go-whosonfirst-sqlite-features v0.2.7/go.mod h1:Bhtd9O7wjm9k4NMaoGErUdcbNRR0DstKD+ImtXRbc5U=
+github.com/whosonfirst/go-whosonfirst-sqlite-features v0.3.0 h1:4Paz+Gxr1Kxt0sxNVbaiqpa6P8BX1RmfJjotc7sWQMA=
+github.com/whosonfirst/go-whosonfirst-sqlite-features v0.3.0/go.mod h1:Bhtd9O7wjm9k4NMaoGErUdcbNRR0DstKD+ImtXRbc5U=
 github.com/whosonfirst/go-whosonfirst-sqlite-index v0.0.1 h1:/GuAgxIHn5vZwAEDA4XUSWe7rYWZW30I4HLQRTpBeJY=
 github.com/whosonfirst/go-whosonfirst-sqlite-index v0.0.1/go.mod h1:5fY1ikCDhe1u0umawonTOICPzv/2CgfFT9hTAen5nsI=
 github.com/whosonfirst/go-whosonfirst-sqlite-index v0.1.0 h1:/tljUy2rchRC9XE4FDteNmYZYhYqxWX2uF4c61WlocU=
