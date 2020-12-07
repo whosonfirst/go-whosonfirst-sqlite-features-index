@@ -110,7 +110,9 @@ Recommended practice is to omit any extra tokens in the rtree specification. Let
 		min_x,
 		min_y,
 		max_x,
-		max_y
+		max_y,
+		is_alt,
+		lastmodified
 	);`
 
 	return fmt.Sprintf(sql, t.Name())
@@ -146,9 +148,9 @@ func (t *RTreeTable) IndexFeature(db sqlite.Database, f geojson.Feature) error {
 	if is_alt {
 		int_is_alt = 1
 	}
+	*/
 	
 	lastmod := whosonfirst.LastModified(f)
-	*/
 	
 	bboxes, err := f.BoundingBoxes()
 
@@ -163,9 +165,9 @@ func (t *RTreeTable) IndexFeature(db sqlite.Database, f geojson.Feature) error {
 	}
 
 	sql := fmt.Sprintf(`INSERT OR REPLACE INTO %s (
-		id, min_x, min_y, max_x, max_y
+		id, min_x, min_y, max_x, max_y, is_alt, lastmodified
 	) VALUES (
-		?, ?, ?, ?, ?
+		?, ?, ?, ?, ?, ?, ?
 	)`, t.Name())
 
 	stmt, err := tx.Prepare(sql)
@@ -181,9 +183,9 @@ func (t *RTreeTable) IndexFeature(db sqlite.Database, f geojson.Feature) error {
 		sw := bbox.Min
 		ne := bbox.Max
 
-		log.Println(sql, str_id, sw.X, sw.Y, ne.X, ne.Y)
+		log.Println(sql, str_id, sw.X, sw.Y, ne.X, ne.Y, is_alt, lastmod)
 		
-		_, err = stmt.Exec(str_id, sw.X, sw.Y, ne.X, ne.Y)
+		_, err = stmt.Exec(str_id, sw.X, sw.Y, ne.X, ne.Y, is_alt, lastmod)
 
 		if err != nil {
 			return err
