@@ -9,7 +9,7 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-sqlite"
 	"github.com/whosonfirst/go-whosonfirst-sqlite-features"
 	"github.com/whosonfirst/go-whosonfirst-sqlite/utils"
-	"log"
+	_ "log"
 )
 
 type RTreeTableOptions struct {
@@ -103,6 +103,16 @@ In the argments to "rtree" in the CREATE VIRTUAL TABLE statement, the names of t
 
 Recommended practice is to omit any extra tokens in the rtree specification. Let each argument to "rtree" be a single ordinary label that is the name of the corresponding column, and omit all other tokens from the argument list. 
 
+	--
+
+	For example:
+
+	1477856011|-122.387908935547|37.6149787902832|-122.384384155273|37.6177368164062|0.0|1568838528.0
+
+	TBD: Store alt type as decimal (fractional) value or simply > 0 numeric value ? How do tools that did not build the index
+	resolve numeric values to string (alt geom) values? Is there any other options besides a second rtree_alt_geom table? Probably
+	not (20201207/thisisaaronland)
+	
 	*/
 	
 	sql := `CREATE VIRTUAL TABLE %s USING rtree (
@@ -136,20 +146,12 @@ func (t *RTreeTable) IndexFeature(db sqlite.Database, f geojson.Feature) error {
 	}
 
 	str_id := f.Id()
-	is_alt := whosonfirst.IsAlt(f)
+	is_alt := whosonfirst.IsAlt(f)	// this returns a boolean which is interpreted as a float by SQLite
 
 	if is_alt && !t.options.IndexAltFiles {
 		return nil
 	}
 
-	/*
-	int_is_alt := 0
-
-	if is_alt {
-		int_is_alt = 1
-	}
-	*/
-	
 	lastmod := whosonfirst.LastModified(f)
 	
 	bboxes, err := f.BoundingBoxes()
@@ -183,8 +185,6 @@ func (t *RTreeTable) IndexFeature(db sqlite.Database, f geojson.Feature) error {
 		sw := bbox.Min
 		ne := bbox.Max
 
-		log.Println(sql, str_id, sw.X, sw.Y, ne.X, ne.Y, is_alt, lastmod)
-		
 		_, err = stmt.Exec(str_id, sw.X, sw.Y, ne.X, ne.Y, is_alt, lastmod)
 
 		if err != nil {
