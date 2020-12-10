@@ -6,12 +6,13 @@ import (
 	"errors"
 	"fmt"
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2"
-	"github.com/whosonfirst/go-whosonfirst-geojson-v2/properties/whosonfirst"
+	"github.com/whosonfirst/go-whosonfirst-geojson-v2/properties/geometry"
+	"github.com/whosonfirst/go-whosonfirst-geojson-v2/properties/whosonfirst"	
 	geojson_utils "github.com/whosonfirst/go-whosonfirst-geojson-v2/utils"
 	"github.com/whosonfirst/go-whosonfirst-sqlite"
 	"github.com/whosonfirst/go-whosonfirst-sqlite-features"
 	"github.com/whosonfirst/go-whosonfirst-sqlite/utils"
-	_ "log"
+	"log"
 )
 
 type RTreeTableOptions struct {
@@ -117,8 +118,8 @@ func (t *RTreeTable) Schema() string {
 	sql := `CREATE VIRTUAL TABLE %s USING rtree (
 		id,
 		min_x,
-		min_y,
 		max_x,
+		min_y,
 		max_y,
 		+wof_id INTEGER,
 		+is_alt INTEGER,
@@ -140,6 +141,13 @@ func (t *RTreeTable) IndexRecord(db sqlite.Database, i interface{}) error {
 
 func (t *RTreeTable) IndexFeature(db sqlite.Database, f geojson.Feature) error {
 
+	switch geometry.Type(f) {
+	case "Polygon", "MultiPolygon" :
+		// pass
+	default:
+		return nil
+	}
+	
 	conn, err := db.Conn()
 
 	if err != nil {
@@ -183,7 +191,7 @@ func (t *RTreeTable) IndexFeature(db sqlite.Database, f geojson.Feature) error {
 	}
 
 	sql := fmt.Sprintf(`INSERT OR REPLACE INTO %s (
-		id, min_x, min_y, max_x, max_y, wof_id, is_alt, alt_label, lastmodified
+		id, min_x, max_x, min_y, max_y, wof_id, is_alt, alt_label, lastmodified
 	) VALUES (
 		NULL, ?, ?, ?, ?, ?, ?, ?, ?
 	)`, t.Name())
@@ -201,9 +209,10 @@ func (t *RTreeTable) IndexFeature(db sqlite.Database, f geojson.Feature) error {
 		sw := bbox.Min
 		ne := bbox.Max
 
-		_, err = stmt.Exec(sw.X, sw.Y, ne.X, ne.Y, wof_id, is_alt, alt_label, lastmod)
+		_, err = stmt.Exec(sw.X, ne.X, sw.Y, ne.Y, wof_id, is_alt, alt_label, lastmod)
 
 		if err != nil {
+			log.Println("WOT", sw, ne)
 			return err
 		}
 	}
