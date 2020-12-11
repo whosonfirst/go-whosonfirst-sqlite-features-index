@@ -3,8 +3,10 @@ package tables
 // https://www.sqlite.org/rtree.html
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/skelterjohn/geom"
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2"
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2/properties/geometry"
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2/properties/whosonfirst"
@@ -114,6 +116,7 @@ func (t *RTreeTable) Schema() string {
 		+wof_id INTEGER,
 		+is_alt TINYINT,
 		+alt_label TEXT,
+		+geometry BLOB,
 		+lastmodified INTEGER
 	);`
 
@@ -164,10 +167,8 @@ func (t *RTreeTable) IndexFeature(db sqlite.Database, f geojson.Feature) error {
 
 	lastmod := whosonfirst.LastModified(f)
 
-	// TBD: Store polygon alongside bounding box in rtree table
-	// https://github.com/whosonfirst/go-whosonfirst-sqlite-features/issues/11
 	
-	bboxes, err := f.BoundingBoxes()
+	polygons, err := f.Polygons()
 
 	if err != nil {
 		return err
@@ -180,9 +181,9 @@ func (t *RTreeTable) IndexFeature(db sqlite.Database, f geojson.Feature) error {
 	}
 
 	sql := fmt.Sprintf(`INSERT OR REPLACE INTO %s (
-		id, min_x, max_x, min_y, max_y, wof_id, is_alt, alt_label, lastmodified
+		id, min_x, max_x, min_y, max_y, wof_id, is_alt, alt_label, geometry, lastmodified
 	) VALUES (
-		NULL, ?, ?, ?, ?, ?, ?, ?, ?
+		NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?
 	)`, t.Name())
 
 	stmt, err := tx.Prepare(sql)
@@ -193,12 +194,28 @@ func (t *RTreeTable) IndexFeature(db sqlite.Database, f geojson.Feature) error {
 
 	defer stmt.Close()
 
-	for _, bbox := range bboxes.Bounds() {
+	for _, poly := range polygons {
 
+		ext := poly.ExteriorRing()
+		bbox := ext.Bounds()
+		
 		sw := bbox.Min
 		ne := bbox.Max
 
-		_, err = stmt.Exec(sw.X, ne.X, sw.Y, ne.Y, wof_id, is_alt, alt_label, lastmod)
+		coords := make([][]geom.Coord, 0)
+		coords = append(coords, ext.Vertices())
+
+		for _, ring := range poly.InteriorRings(){
+			coords = append(coords, ring.Vertices())
+		}
+
+		geometry, err := json.Marshal(coords)
+
+		if err != nil {
+			return err
+		}
+		
+		_, err = stmt.Exec(sw.X, ne.X, sw.Y, ne.Y, wof_id, is_alt, alt_label, string(geometry), lastmod)
 
 		if err != nil {
 			return err
