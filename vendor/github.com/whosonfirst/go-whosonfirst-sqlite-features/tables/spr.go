@@ -9,9 +9,23 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-sqlite/utils"
 )
 
+type SPRTableOptions struct {
+	IndexAltFiles bool
+}
+
+func DefaultSPRTableOptions() (*SPRTableOptions, error) {
+
+	opts := SPRTableOptions{
+		IndexAltFiles: false,
+	}
+
+	return &opts, nil
+}
+
 type SPRTable struct {
 	features.FeatureTable
-	name string
+	name    string
+	options *SPRTableOptions
 }
 
 type SPRRow struct {
@@ -39,9 +53,41 @@ type SPRRow struct {
 	LastModified  int64   // properties.wof:lastmodified INTEGER
 }
 
+func NewSPRTable() (sqlite.Table, error) {
+
+	opts, err := DefaultSPRTableOptions()
+
+	if err != nil {
+		return nil, err
+	}
+
+	return NewSPRTableWithOptions(opts)
+}
+
+func NewSPRTableWithOptions(opts *SPRTableOptions) (sqlite.Table, error) {
+
+	t := SPRTable{
+		name:    "spr",
+		options: opts,
+	}
+
+	return &t, nil
+}
+
 func NewSPRTableWithDatabase(db sqlite.Database) (sqlite.Table, error) {
 
-	t, err := NewSPRTable()
+	opts, err := DefaultSPRTableOptions()
+
+	if err != nil {
+		return nil, err
+	}
+
+	return NewSPRTableWithDatabaseAndOptions(db, opts)
+}
+
+func NewSPRTableWithDatabaseAndOptions(db sqlite.Database, opts *SPRTableOptions) (sqlite.Table, error) {
+
+	t, err := NewSPRTableWithOptions(opts)
 
 	if err != nil {
 		return nil, err
@@ -54,15 +100,6 @@ func NewSPRTableWithDatabase(db sqlite.Database) (sqlite.Table, error) {
 	}
 
 	return t, nil
-}
-
-func NewSPRTable() (sqlite.Table, error) {
-
-	t := SPRTable{
-		name: "spr",
-	}
-
-	return &t, nil
 }
 
 func (t *SPRTable) InitializeTable(db sqlite.Database) error {
@@ -96,6 +133,8 @@ func (t *SPRTable) Schema() string {
 			is_superseding INTEGER,
 			superseded_by TEXT,
 			supersedes TEXT,
+			is_alt TINYINT,
+			alt_label TEXT,
 			lastmodified INTEGER
 	);
 
@@ -125,10 +164,7 @@ func (t *SPRTable) IndexRecord(db sqlite.Database, i interface{}) error {
 func (t *SPRTable) IndexFeature(db sqlite.Database, f geojson.Feature) error {
 
 	is_alt := whosonfirst.IsAlt(f)
-
-	if is_alt {
-		return nil
-	}
+	alt_label := whosonfirst.AltLabel(f)
 
 	spr, err := f.SPR()
 
@@ -155,6 +191,7 @@ func (t *SPRTable) IndexFeature(db sqlite.Database, f geojson.Feature) error {
 		?, ?, ?,
 		?, ?,
 		?, ?,
+		?, ?,
 		?
 		)`, t.Name()) // ON CONFLICT DO BLAH BLAH BLAH
 
@@ -167,6 +204,7 @@ func (t *SPRTable) IndexFeature(db sqlite.Database, f geojson.Feature) error {
 		spr.IsCurrent().Flag(), spr.IsDeprecated().Flag(), spr.IsCeased().Flag(),
 		spr.IsSuperseded().Flag(), spr.IsSuperseding().Flag(),
 		"", "",
+		is_alt, alt_label,
 		spr.LastModified(),
 	}
 

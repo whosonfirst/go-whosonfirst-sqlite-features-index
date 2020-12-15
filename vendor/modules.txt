@@ -72,7 +72,7 @@ github.com/whosonfirst/go-whosonfirst-spr
 github.com/whosonfirst/go-whosonfirst-sqlite
 github.com/whosonfirst/go-whosonfirst-sqlite/database
 github.com/whosonfirst/go-whosonfirst-sqlite/utils
-# github.com/whosonfirst/go-whosonfirst-sqlite-features v0.4.0
+# github.com/whosonfirst/go-whosonfirst-sqlite-features v0.5.0
 github.com/whosonfirst/go-whosonfirst-sqlite-features
 github.com/whosonfirst/go-whosonfirst-sqlite-features/tables
 # github.com/whosonfirst/go-whosonfirst-sqlite-index v0.2.0

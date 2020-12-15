@@ -13,7 +13,7 @@ require (
 	github.com/whosonfirst/go-whosonfirst-log v0.1.0
 	github.com/whosonfirst/go-whosonfirst-reader v0.0.1
 	github.com/whosonfirst/go-whosonfirst-sqlite v0.1.6
-	github.com/whosonfirst/go-whosonfirst-sqlite-features v0.4.0
+	github.com/whosonfirst/go-whosonfirst-sqlite-features v0.5.0
 	github.com/whosonfirst/go-whosonfirst-sqlite-index v0.2.0
 	github.com/whosonfirst/warning v0.1.1
 )
