@@ -42,6 +42,8 @@ func main() {
 	geometries := flag.Bool("geometries", false, "Index the 'geometries' table (requires that libspatialite already be installed)")
 	names := flag.Bool("names", false, "Index the 'names' table")
 	rtree := flag.Bool("rtree", false, "Index the 'rtree' table")
+	geometry := flag.Bool("geometry", false, "Index the 'geometry' table")
+	properties := flag.Bool("properties", false, "Index the 'properties' table")
 	search := flag.Bool("search", false, "Index the 'search' table (using SQLite FTS4 full-text indexer)")
 	spr := flag.Bool("spr", false, "Index the 'spr' table")
 	live_hard := flag.Bool("live-hard-die-fast", true, "Enable various performance-related pragmas at the expense of possible (unlikely) database corruption")
@@ -145,6 +147,44 @@ func main() {
 		to_index = append(to_index, gt)
 	}
 
+	if *geometry || *all {
+
+		geometry_opts, err := tables.DefaultGeometryTableOptions()
+
+		if err != nil {
+			logger.Fatal("failed to create 'geometry' table options because %s", err)
+		}
+
+		geometry_opts.IndexAltFiles = *alt_files
+
+		gt, err := tables.NewGeometryTableWithDatabaseAndOptions(db, geometry_opts)
+
+		if err != nil {
+			logger.Fatal("failed to create 'geometry' table because %s", err)
+		}
+
+		to_index = append(to_index, gt)
+	}
+
+	if *properties || *all {
+
+		properties_opts, err := tables.DefaultPropertiesTableOptions()
+
+		if err != nil {
+			logger.Fatal("failed to create 'properties' table options because %s", err)
+		}
+
+		properties_opts.IndexAltFiles = *alt_files
+
+		gt, err := tables.NewPropertiesTableWithDatabaseAndOptions(db, properties_opts)
+
+		if err != nil {
+			logger.Fatal("failed to create 'properties' table because %s", err)
+		}
+
+		to_index = append(to_index, gt)
+	}
+
 	if *spr || *all {
 
 		spr_opts, err := tables.DefaultSPRTableOptions()
@@ -154,7 +194,7 @@ func main() {
 		}
 
 		spr_opts.IndexAltFiles = *alt_files
-		
+
 		st, err := tables.NewSPRTableWithDatabaseAndOptions(db, spr_opts)
 
 		if err != nil {
