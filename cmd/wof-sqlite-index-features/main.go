@@ -147,7 +147,15 @@ func main() {
 
 	if *spr || *all {
 
-		st, err := tables.NewSPRTableWithDatabase(db)
+		spr_opts, err := tables.DefaultSPRTableOptions()
+
+		if err != nil {
+			logger.Fatal("Failed to create 'spr' table options because %v", err)
+		}
+
+		spr_opts.IndexAltFiles = *alt_files
+		
+		st, err := tables.NewSPRTableWithDatabaseAndOptions(db, spr_opts)
 
 		if err != nil {
 			logger.Fatal("failed to create 'spr' table because %s", err)
