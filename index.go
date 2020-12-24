@@ -135,9 +135,17 @@ func SQLiteFeaturesIndexRelationsFuncWithOptions(opts *SQLiteFeaturesIndexRelati
 			}
 
 			for _, r := range rsp.Array() {
+
 				id := r.Int()
+
+				// skip -1, -4, etc.
+				// (20201224/thisisaaronland)
+
+				if id <= 0 {
+					continue
+				}
+
 				relations[id] = true
-				// log.Println("MATCH", path, id)
 			}
 		}
 
