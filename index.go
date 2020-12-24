@@ -9,14 +9,15 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2"
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2/feature"
 	wof_index "github.com/whosonfirst/go-whosonfirst-index"
-	wof_reader "github.com/whosonfirst/go-whosonfirst-reader"
 	"github.com/whosonfirst/go-whosonfirst-sqlite"
+	"github.com/whosonfirst/go-whosonfirst-uri"	
 	wof_tables "github.com/whosonfirst/go-whosonfirst-sqlite-features/tables"
 	sql_index "github.com/whosonfirst/go-whosonfirst-sqlite-index"
 	"github.com/whosonfirst/warning"
 	"io"
 	"io/ioutil"
 	"log"
+	"sync"
 )
 
 type SQLiteFeaturesLoadRecordFuncOptions struct {
@@ -81,6 +82,8 @@ func SQLiteFeaturesLoadRecordFunc(opts *SQLiteFeaturesLoadRecordFuncOptions) sql
 
 func SQLiteFeaturesIndexRelationsFunc(r reader.Reader) sql_index.SQLiteIndexerPostIndexFunc {
 
+	seen := new(sync.Map)
+	
 	cb := func(ctx context.Context, db sqlite.Database, tables []sqlite.Table, record interface{}) error {
 
 		geojson_t, err := wof_tables.NewGeoJSONTable()
@@ -127,6 +130,14 @@ func SQLiteFeaturesIndexRelationsFunc(r reader.Reader) sql_index.SQLiteIndexerPo
 
 		for id, _ := range relations {
 
+			_, ok := seen.Load(id)
+
+			if ok {
+				continue
+			}
+
+			seen.Store(id, true)
+			
 			sql := fmt.Sprintf("SELECT COUNT(id) FROM %s WHERE id=?", geojson_t.Name())
 			row := conn.QueryRow(sql, id)
 
@@ -141,9 +152,26 @@ func SQLiteFeaturesIndexRelationsFunc(r reader.Reader) sql_index.SQLiteIndexerPo
 				continue
 			}
 
-			ancestor, err := wof_reader.LoadFeatureFromID(ctx, r, id)
+			rel_path, err := uri.Id2RelPath(id)
 
 			if err != nil {
+				return err
+			}
+
+			fh, err := r.Read(ctx, rel_path)
+
+			if err != nil{
+				return err
+			}
+
+			defer fh.Close()
+
+			ancestor, err := feature.LoadFeatureFromReader(fh)
+
+			// check for warnings in case this record has a non-standard
+			// placetype (20201224/thisisaaronland)
+			
+			if err != nil && !warning.IsWarning(err){
 				return err
 			}
 
