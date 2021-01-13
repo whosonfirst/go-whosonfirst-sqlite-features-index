@@ -3,6 +3,7 @@ module github.com/whosonfirst/go-whosonfirst-sqlite-features-index
 go 1.12
 
 require (
+	github.com/aaronland/go-json-query v0.0.2
 	github.com/tidwall/gjson v1.6.7
 	github.com/whosonfirst/go-reader v0.2.0
 	github.com/whosonfirst/go-reader-http v0.1.0
