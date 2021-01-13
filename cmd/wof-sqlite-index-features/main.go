@@ -28,13 +28,22 @@ import (
 
 func main() {
 
-	valid_modes := strings.Join(wof_index.Modes(), ",")
-	desc_modes := fmt.Sprintf("The mode to use importing data. Valid modes are: %s.", valid_modes)
+	valid_modes := make([]string, 0)
+
+	for _, m := range wof_index.Modes() {
+
+		m = fmt.Sprintf("%s://", m)
+		valid_modes = append(valid_modes, m)
+	}
+
+	valid_modes_str := strings.Join(valid_modes, ", ")
+
+	desc_modes := fmt.Sprintf("The mode to use importing data. Valid modes are: %s.", valid_modes_str)
 
 	dsn := flag.String("dsn", ":memory:", "")
 	driver := flag.String("driver", "sqlite3", "")
 
-	mode := flag.String("mode", "files", desc_modes)
+	mode := flag.String("mode", "repo://", desc_modes)
 
 	all := flag.Bool("all", false, "Index all tables (except the 'search' and 'geometries' tables which you need to specify explicitly)")
 	ancestors := flag.Bool("ancestors", false, "Index the 'ancestors' tables")
