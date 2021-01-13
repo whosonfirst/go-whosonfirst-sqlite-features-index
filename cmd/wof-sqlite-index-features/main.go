@@ -11,6 +11,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"github.com/aaronland/go-json-query"
 	"github.com/whosonfirst/go-reader"
 	wof_index "github.com/whosonfirst/go-whosonfirst-index"
 	log "github.com/whosonfirst/go-whosonfirst-log"
@@ -55,6 +56,14 @@ func main() {
 
 	index_relations := flag.Bool("index-relations", false, "Index the records related to a feature, specifically wof:belongsto, wof:depicts and wof:involves. Alt files for relations are not indexed at this time.")
 	relations_uri := flag.String("index-relations-reader-uri", "", "A valid go-reader.Reader URI from which to read data for a relations candidate.")
+
+	var queries query.QueryFlags
+	flag.Var(&queries, "query", "One or more {PATH}={REGEXP} parameters for filtering records.")
+
+	valid_query_modes := strings.Join([]string{query.QUERYSET_MODE_ALL, query.QUERYSET_MODE_ANY}, ", ")
+	desc_query_modes := fmt.Sprintf("Specify how query filtering should be evaluated. Valid modes are: %s", valid_query_modes)
+
+	query_mode := flag.String("query-mode", query.QUERYSET_MODE_ALL, desc_query_modes)
 
 	var procs = flag.Int("processes", (runtime.NumCPU() * 2), "The number of concurrent processes to index data with")
 
@@ -280,6 +289,16 @@ func main() {
 
 	record_opts := &index.SQLiteFeaturesLoadRecordFuncOptions{
 		StrictAltFiles: *strict_alt_files,
+	}
+
+	if len(queries) > 0 {
+
+		qs := &query.QuerySet{
+			Queries: queries,
+			Mode:    *query_mode,
+		}
+
+		record_opts.QuerySet = qs
 	}
 
 	record_func := index.SQLiteFeaturesLoadRecordFunc(record_opts)
