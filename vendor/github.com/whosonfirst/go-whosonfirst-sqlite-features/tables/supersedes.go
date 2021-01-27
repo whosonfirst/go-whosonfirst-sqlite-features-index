@@ -48,13 +48,14 @@ func (t *SupersedesTable) Schema() string {
 
 	sql := `CREATE TABLE %s (
 		id INTEGER NOT NULL,
+		superseded_id INTEGER NOT NULL,
 		superseded_by_id INTEGER NOT NULL,
 		lastmodified INTEGER
 	);
 
-	CREATE UNIQUE INDEX supersedes_by ON %s (id,superseded_by_id);
+	CREATE UNIQUE INDEX supersedes_by ON %s (id,superseded_id, superseded_by_id);
 	`
-	
+
 	return fmt.Sprintf(sql, t.Name(), t.Name())
 }
 
@@ -90,43 +91,43 @@ func (t *SupersedesTable) IndexFeature(db sqlite.Database, f geojson.Feature) er
 	id := whosonfirst.Id(f)
 	lastmod := whosonfirst.LastModified(f)
 
-			sql := fmt.Sprintf(`INSERT OR REPLACE INTO %s (
-				id, superseded_by_id, lastmodified
+	sql := fmt.Sprintf(`INSERT OR REPLACE INTO %s (
+				id, superseded_id, superseded_by_id, lastmodified
 			) VALUES (
-			  	 ?, ?, ?
+			  	 ?, ?, ?, ?
 			)`, t.Name())
 
-			stmt, err := tx.Prepare(sql)
+	stmt, err := tx.Prepare(sql)
 
-			if err != nil {
-				return err
-			}
+	if err != nil {
+		return err
+	}
 
-			defer stmt.Close()
+	defer stmt.Close()
 
 	superseded_by := whosonfirst.SupersededBy(f)
 
 	for _, other_id := range superseded_by {
 
-			_, err = stmt.Exec(id, other_id, lastmod)
+		_, err = stmt.Exec(id, id, other_id, lastmod)
 
-			if err != nil {
-				return err
-			}
+		if err != nil {
+			return err
+		}
 
-        }
+	}
 
 	supersedes := whosonfirst.Supersedes(f)
 
 	for _, other_id := range supersedes {
 
-			_, err = stmt.Exec(other_id, id, lastmod)
+		_, err = stmt.Exec(id, other_id, id, lastmod)
 
-			if err != nil {
-				return err
-			}
+		if err != nil {
+			return err
+		}
 
-        }
+	}
 
 	return tx.Commit()
 }

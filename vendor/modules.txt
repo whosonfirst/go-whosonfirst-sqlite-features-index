@@ -24,7 +24,7 @@ github.com/tidwall/pretty
 github.com/twpayne/go-geom
 github.com/twpayne/go-geom/encoding/geojson
 github.com/twpayne/go-geom/encoding/wkt
-# github.com/whosonfirst/go-reader v0.2.0
+# github.com/whosonfirst/go-reader v0.2.1
 github.com/whosonfirst/go-reader
 # github.com/whosonfirst/go-reader-http v0.1.0
 github.com/whosonfirst/go-reader-http
@@ -72,7 +72,7 @@ github.com/whosonfirst/go-whosonfirst-spr
 github.com/whosonfirst/go-whosonfirst-sqlite
 github.com/whosonfirst/go-whosonfirst-sqlite/database
 github.com/whosonfirst/go-whosonfirst-sqlite/utils
-# github.com/whosonfirst/go-whosonfirst-sqlite-features v0.6.5
+# github.com/whosonfirst/go-whosonfirst-sqlite-features v0.6.6
 github.com/whosonfirst/go-whosonfirst-sqlite-features
 github.com/whosonfirst/go-whosonfirst-sqlite-features/tables
 # github.com/whosonfirst/go-whosonfirst-sqlite-index v0.2.0

@@ -56,6 +56,8 @@ func main() {
 	properties := flag.Bool("properties", false, "Index the 'properties' table")
 	search := flag.Bool("search", false, "Index the 'search' table (using SQLite FTS4 full-text indexer)")
 	spr := flag.Bool("spr", false, "Index the 'spr' table")
+	supersedes := flag.Bool("supersedes", false, "Index the 'supersedes' table")
+	
 	live_hard := flag.Bool("live-hard-die-fast", true, "Enable various performance-related pragmas at the expense of possible (unlikely) database corruption")
 	timings := flag.Bool("timings", false, "Display timings during and after indexing")
 	optimize := flag.Bool("optimize", true, "Attempt to optimize the database before closing connection")
@@ -144,6 +146,17 @@ func main() {
 		}
 
 		to_index = append(to_index, gt)
+	}
+
+	if *supersedes || *all {
+
+		t, err := tables.NewSupersedesTableWithDatabase(db)
+		
+		if err != nil {
+			logger.Fatal("failed to create 'supersedes' table because %s", err)
+		}
+
+		to_index = append(to_index, t)
 	}
 
 	if *rtree || *all {
