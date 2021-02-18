@@ -25,10 +25,12 @@ import (
 func main() {
 
 	valid_schemes := strings.Join(emitter.Schemes(), ",")
-	emitter_desc := fmt.Sprintf("A valid whosonfirst/go-whosonfirst-iterate/emitter URI. Supported emitter URI schemes are: %s", valid_schemes)
+	iterator_desc := fmt.Sprintf("A valid whosonfirst/go-whosonfirst-iterate/emitter URI. Supported emitter URI schemes are: %s", valid_schemes)
 
-	// mode := flag.String("mode", "repo://", emitter_modes)
-	emitter_uri := flag.String("emitter-uri", "repo://", emitter_desc)
+	iterator_uri := flag.String("iterator-uri", "repo://", iterator_desc)
+
+	mode_desc := fmt.Sprintf("%s. THIS FLAG IS DEPRECATED, please use -iterator-uri instead.", iterator_desc)	
+	mode := flag.String("mode", "repo://", mode_desc)
 
 	dsn := flag.String("dsn", ":memory:", "")
 	driver := flag.String("driver", "sqlite3", "")
@@ -60,6 +62,10 @@ func main() {
 
 	flag.Parse()
 
+	if *iterator_uri == "" {
+		*iterator_uri = *mode
+	}
+	
 	ctx := context.Background()
 
 	runtime.GOMAXPROCS(*procs)
@@ -324,10 +330,10 @@ func main() {
 	idx.Timings = *timings
 	idx.Logger = logger
 
-	err = idx.IndexPaths(ctx, *emitter_uri, flag.Args())
+	err = idx.IndexPaths(ctx, *iterator_uri, flag.Args())
 
 	if err != nil {
-		logger.Fatal("Failed to index paths in %s mode because: %s", *emitter_uri, err)
+		logger.Fatal("Failed to index paths in %s mode because: %s", *iterator_uri, err)
 	}
 
 	os.Exit(0)

@@ -38,10 +38,12 @@ Usage of ./bin/wof-sqlite-index-features:
     	Index the records related to a feature, specifically wof:belongsto, wof:depicts and wof:involves. Alt files for relations are not indexed at this time.
   -index-relations-reader-uri string
     	A valid go-reader.Reader URI from which to read data for a relations candidate.
+  -iterator-uri string
+    	A valid whosonfirst/go-whosonfirst-iterate/emitter URI. Supported emitter URI schemes are: directory://,featurecollection://,file://,filelist://,geojsonl://,repo:// (default "repo://")
   -live-hard-die-fast
     	Enable various performance-related pragmas at the expense of possible (unlikely) database corruption (default true)
   -mode string
-    	The mode to use importing data. Valid modes are: directory://, featurecollection://, file://, filelist://, geojsonl://, metafile://, repo://, sqlite://. (default "repo://")	
+    	A valid whosonfirst/go-whosonfirst-iterate/emitter URI. Supported emitter URI schemes are: directory://,featurecollection://,file://,filelist://,geojsonl://,repo://. THIS FLAG IS DEPRECATED, please use -iterator-uri instead. (default "repo://")	
   -names
     	Index the 'names' table
   -optimize
@@ -50,10 +52,6 @@ Usage of ./bin/wof-sqlite-index-features:
     	The number of concurrent processes to index data with (default 8)
   -properties
     	Index the 'properties' table
-  -query value
-    	One or more {PATH}={REGEXP} parameters for filtering records.
-  -query-mode string
-    	Specify how query filtering should be evaluated. Valid modes are: ALL, ANY (default "ALL")
   -rtree
     	Index the 'rtree' table
   -search
@@ -62,6 +60,8 @@ Usage of ./bin/wof-sqlite-index-features:
     	Index the 'spr' table
   -strict-alt-files
     	Be strict when indexing alt geometries (default true)
+  -supersedes
+    	Index the 'supersedes' table
   -timings
     	Display timings during and after indexing
 ```
@@ -72,8 +72,8 @@ For example:
 $> ./bin/wof-sqlite-index-features \
 	-dsn microhoods.db \
 	-all \
-	-mode meta:// \
-	/usr/local/data/whosonfirst-data/meta/wof-microhood-latest.csv
+	-iterator-uri 'repo://?include=properties.wof:placetype=microhood' \
+	/usr/local/data/whosonfirst-data-admin-us
 ```
 
 Or creating databases for all the Who's On First repos:
@@ -105,7 +105,7 @@ done
 
 #### Inline queries
 
-You can also specify inline queries by passing a `-query` parameter which is a string in the format of:
+You can also specify inline queries by appending one or more `include` or `exclude` parameters to a `emitter.Emitter` URI, where the value is a string in the format of:
 
 ```
 {PATH}={REGULAR EXPRESSION}
@@ -119,8 +119,7 @@ For example:
 $> ./bin/wof-sqlite-index-features \
 	-all \
 	-dsn ca-region.db \
-	-query 'properties.wof:placetype=region' \
-	-mode repo:// \	
+	-iterator-uri 'repo://?include=properties.wof:placetype=region' \	
 	/usr/local/data/whosonfirst-data-admin-ca
 
 $> sqlite3 ca-region.db
@@ -141,19 +140,15 @@ sqlite> SELECT id,name,placetype FROM spr;
 85682113|Saskatchewan|region
 136251273|Quebec|region
 85682105|Nunavut|region
-sqlite>
-
 ```
 
-You can pass multiple `-query` parameters. For example:
+You can pass multiple query parameters. For example:
 
 ```
 $> ./bin/wof-sqlite-index-features \
 	-all \
 	-dsn ca-region.db \
-	-query 'properties.wof:placetype=region' \
-	-query 'properties.wof:name=(?i)new.*'	
-	-mode repo:// \	
+	-iterator-uri 'repo://?include=properties.wof:placetype=region&include=properties.wof:name=(?i)new.*' \	
 	/usr/local/data/whosonfirst-data-admin-ca
 
 $> sqlite3 ca-region-new.db
@@ -163,60 +158,15 @@ Enter ".help" for usage hints.
 sqlite> SELECT id,name,placetype FROM spr;
 85682065|New Brunswick|region
 85682123|Newfoundland and Labrador|region
-sqlite>
 ```
 
-The default query mode is to ensure that all queries match but you can also specify that only one or more queries need to match by passing the `-query-mode ANY` flag:
+The default query mode is to ensure that all queries match but you can also specify that only one or more queries need to match by appending a `include_mode` or `exclude_mode` parameter where the value is either "ANY" or "ALL".
 
 #### SQLite performace-related PRAGMA
 
 Note that the `-live-hard-die-fast` flag is enabled by default. That is to enable a number of performace-related PRAGMA commands (described [here](https://blog.devart.com/increasing-sqlite-performance.html) and [here](https://www.gaia-gis.it/gaia-sins/spatialite-cookbook/html/system.html)) without which database index can be prohibitive and time-consuming. These is a small but unlikely chance of database corruptions when this flag is enabled.
 
 Also note that the `-live-hard-die-fast` flag will cause the `PAGE_SIZE` and `CACHE_SIZE` PRAGMAs to be set to `4096` and `1000000` respectively so the eventual cache size will require 4GB of memory. This is probably fine on most systems where you'll be indexing data but I am open to the idea that we may need to revisit those numbers or at least make them configurable.
-
-### wof-sqlite-query-features
-
-Query a search-enabled SQLite database by name(s). Results are output as CSV encoded rows containing `id` and `(wof:)name` properties.
-
-_This assumes you have created the database using the `wof-sqlite-index-features` tool with the `-search` paramter._
-
-```
-$> ./bin/wof-sqlite-query-features -h
-Usage of ./bin/wof-sqlite-query-features:
-  -column string
-    	The 'names_*' column to query against. Valid columns are: names_all, names_preferred, names_variant, names_colloquial. (default "names_all")
-  -driver string
-    	 (default "sqlite3")
-  -dsn string
-    	 (default ":memory:")
-  -is-ceased string
-    	A comma-separated list of valid existential flags (-1,0,1) to filter results according to whether or not they have been marked as ceased. Multiple flags are evaluated as a nested 'OR' query.
-  -is-current string
-    	A comma-separated list of valid existential flags (-1,0,1) to filter results according to their 'mz:is_current' property. Multiple flags are evaluated as a nested 'OR' query.
-  -is-deprecated string
-    	A comma-separated list of valid existential flags (-1,0,1) to filter results according to whether or not they have been marked as deprecated. Multiple flags are evaluated as a nested 'OR' query.
-  -is-superseded string
-    	A comma-separated list of valid existential flags (-1,0,1) to filter results according to whether or not they have been marked as superseded. Multiple flags are evaluated as a nested 'OR' query.
-  -output string
-    	A valid path to write (CSV) results to. If empty results are written to STDOUT.
-  -table string
-    	The name of the SQLite table to query against. (default "search")
-```
-
-For example:
-
-```
-$> ./bin/wof-sqlite-query-features -dsn test2.db JFK
-102534365,John F Kennedy Int'l Airport
-
-$> ./bin/wof-sqlite-query-features -dsn test2.db -column names_colloquial Paris
-85922583,San Francisco
-102027181,Shanghai
-102030585,Kolkata
-101751929,Tromsø
-```
-
-Full-text search is supported using SQLite's FTS4 indexer. In order to index the `search` table you must explicitly pass the `-search` flag to the `wof-sqlite-index-features` command. It is _not_ included when you set the `-all` flag (which should probably be renamed to be `-common` but that's not the case today...) because it increases the overall indexing time by a non-trivial amount.
 
 ## Spatial indexes
 
@@ -232,7 +182,6 @@ $> ./bin/wof-sqlite-index-features \
 	-properties \
 	-timings \
 	-dsn /usr/local/ca-alt.db \
-	-mode repo:// \
 	/usr/local/data/whosonfirst-data-admin-ca/
 ```
 
@@ -246,7 +195,6 @@ $> ./bin/wof-sqlite-index-features \
 	-timings \
 	-spr \
 	-geometries \
-	-mode repo:// \
 	-dsn test.db /usr/local/data/whosonfirst-data-constituency-ca/
 
 10:09:46.534281 [wof-sqlite-index-features] STATUS time to index geometries (87) : 21.251828704s
@@ -301,7 +249,6 @@ $> ./bin/wof-sqlite-index-features \
 	-geometries \
 	-dsn /usr/local/data/dist/sqlite/whosonfirst-data-latest.db \
 	-timings \
-	-mode repo:// \
 	/usr/local/data/whosonfirst-data
 
 ...time passes...
@@ -324,7 +271,6 @@ $> ./bin/wof-sqlite-index-features \
 	-all \
 	-dsn /usr/local/data/dist/sqlite/whosonfirst-data-latest-nospatial.db \
 	-timings \
-	-mode repo:// \
 	/usr/local/data/whosonfirst-data
 ...time passes...
 10:06:13.226187 [wof-sqlite-index-features] STATUS time to index names (951541) : 12m32.359733539s
@@ -340,11 +286,9 @@ $> ./bin/wof-sqlite-index-features \
 
 As of this writing individual tables are indexed atomically. There may be some improvements to be made indexing tables in separate Go routines but my hunch is this will make SQLite sad and cause a lot of table lock errors. I don't need to be right about that, though...
 
-## Dependencies and relationships
-
-These are documented in the [Dependencies and relationships section](https://github.com/whosonfirst/go-whosonfirst-sqlite#dependencies-and-relationships) of the `go-whosonfirst-sqlite` package.
-
 ## See also
 
 * https://github.com/whosonfirst/go-whosonfirst-sqlite
 * https://github.com/whosonfirst/go-whosonfirst-sqlite-features
+* https://github.com/whosonfirst/go-whosonfirst-sqlite-index
+* https://github.com/whosonfirst/go-whosonfirst-iterate
