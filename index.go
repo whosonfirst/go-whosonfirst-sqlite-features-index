@@ -4,26 +4,23 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/aaronland/go-json-query"
 	"github.com/tidwall/gjson"
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2"
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2/feature"
-	wof_index "github.com/whosonfirst/go-whosonfirst-index"
+	"github.com/whosonfirst/go-whosonfirst-iterate/emitter"
 	"github.com/whosonfirst/go-whosonfirst-sqlite"
 	wof_tables "github.com/whosonfirst/go-whosonfirst-sqlite-features/tables"
 	sql_index "github.com/whosonfirst/go-whosonfirst-sqlite-index"
 	"github.com/whosonfirst/go-whosonfirst-uri"
 	"github.com/whosonfirst/warning"
 	"io"
-	"io/ioutil"
 	"log"
 	"sync"
 )
 
 type SQLiteFeaturesLoadRecordFuncOptions struct {
 	StrictAltFiles bool
-	QuerySet       *query.QuerySet
 }
 
 type SQLiteFeaturesIndexRelationsFuncOptions struct {
@@ -33,7 +30,7 @@ type SQLiteFeaturesIndexRelationsFuncOptions struct {
 
 func SQLiteFeaturesLoadRecordFunc(opts *SQLiteFeaturesLoadRecordFuncOptions) sql_index.SQLiteIndexerLoadRecordFunc {
 
-	cb := func(ctx context.Context, fh io.Reader, args ...interface{}) (interface{}, error) {
+	cb := func(ctx context.Context, fh io.ReadSeeker, args ...interface{}) (interface{}, error) {
 
 		select {
 
@@ -41,42 +38,23 @@ func SQLiteFeaturesLoadRecordFunc(opts *SQLiteFeaturesLoadRecordFuncOptions) sql
 			return nil, nil
 		default:
 
-			path, err := wof_index.PathForContext(ctx)
+			path, err := emitter.PathForContext(ctx)
 
 			if err != nil {
 				return nil, err
 			}
 
-			// we read the whole thing in to memory here so don't
-			// have to worry about whether fh is a ReadSeeker if
-			// the first attempt to load a primary WOF file fails
-			// and we try again for an alt file
-			// (20191103/straup)
+			i, err := feature.LoadWOFFeatureFromReader(fh)
 
-			body, err := ioutil.ReadAll(fh)
+			if err != nil && !warning.IsWarning(err) {
 
-			if err != nil {
-				return nil, err
-			}
-
-			if opts.QuerySet != nil && len(opts.QuerySet.Queries) > 0 {
-
-				matches, err := query.Matches(ctx, opts.QuerySet, body)
+				_, err := fh.Seek(0, 0)
 
 				if err != nil {
 					return nil, err
 				}
 
-				if !matches {
-					return nil, nil
-				}
-			}
-
-			i, err := feature.NewWOFFeature(body)
-
-			if err != nil && !warning.IsWarning(err) {
-
-				alt, alt_err := feature.NewWOFAltFeature(body)
+				alt, alt_err := feature.LoadWOFAltFeatureFromReader(fh)
 
 				if alt_err != nil && !warning.IsWarning(alt_err) {
 

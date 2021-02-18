@@ -2,19 +2,15 @@ package main
 
 import (
 	_ "github.com/whosonfirst/go-reader-http"
-	_ "github.com/whosonfirst/go-whosonfirst-index-csv"
-	_ "github.com/whosonfirst/go-whosonfirst-index-sqlite"
-	_ "github.com/whosonfirst/go-whosonfirst-index/fs"
 )
 
 import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/aaronland/go-json-query"
 	"github.com/whosonfirst/go-reader"
-	wof_index "github.com/whosonfirst/go-whosonfirst-index"
-	log "github.com/whosonfirst/go-whosonfirst-log"
+	"github.com/whosonfirst/go-whosonfirst-iterate/emitter"
+	"github.com/whosonfirst/go-whosonfirst-log"
 	"github.com/whosonfirst/go-whosonfirst-sqlite"
 	"github.com/whosonfirst/go-whosonfirst-sqlite-features-index"
 	"github.com/whosonfirst/go-whosonfirst-sqlite-features/tables"
@@ -28,22 +24,14 @@ import (
 
 func main() {
 
-	valid_modes := make([]string, 0)
+	valid_schemes := strings.Join(emitter.Schemes(), ",")
+	emitter_desc := fmt.Sprintf("A valid whosonfirst/go-whosonfirst-iterate/emitter URI. Supported emitter URI schemes are: %s", valid_schemes)
 
-	for _, m := range wof_index.Modes() {
-
-		m = fmt.Sprintf("%s://", m)
-		valid_modes = append(valid_modes, m)
-	}
-
-	valid_modes_str := strings.Join(valid_modes, ", ")
-
-	desc_modes := fmt.Sprintf("The mode to use importing data. Valid modes are: %s.", valid_modes_str)
+	// mode := flag.String("mode", "repo://", emitter_modes)
+	emitter_uri := flag.String("emitter-uri", "repo://", emitter_desc)
 
 	dsn := flag.String("dsn", ":memory:", "")
 	driver := flag.String("driver", "sqlite3", "")
-
-	mode := flag.String("mode", "repo://", desc_modes)
 
 	all := flag.Bool("all", false, "Index all tables (except the 'search' and 'geometries' tables which you need to specify explicitly)")
 	ancestors := flag.Bool("ancestors", false, "Index the 'ancestors' tables")
@@ -57,7 +45,7 @@ func main() {
 	search := flag.Bool("search", false, "Index the 'search' table (using SQLite FTS4 full-text indexer)")
 	spr := flag.Bool("spr", false, "Index the 'spr' table")
 	supersedes := flag.Bool("supersedes", false, "Index the 'supersedes' table")
-	
+
 	live_hard := flag.Bool("live-hard-die-fast", true, "Enable various performance-related pragmas at the expense of possible (unlikely) database corruption")
 	timings := flag.Bool("timings", false, "Display timings during and after indexing")
 	optimize := flag.Bool("optimize", true, "Attempt to optimize the database before closing connection")
@@ -68,17 +56,11 @@ func main() {
 	index_relations := flag.Bool("index-relations", false, "Index the records related to a feature, specifically wof:belongsto, wof:depicts and wof:involves. Alt files for relations are not indexed at this time.")
 	relations_uri := flag.String("index-relations-reader-uri", "", "A valid go-reader.Reader URI from which to read data for a relations candidate.")
 
-	var queries query.QueryFlags
-	flag.Var(&queries, "query", "One or more {PATH}={REGEXP} parameters for filtering records.")
-
-	valid_query_modes := strings.Join([]string{query.QUERYSET_MODE_ALL, query.QUERYSET_MODE_ANY}, ", ")
-	desc_query_modes := fmt.Sprintf("Specify how query filtering should be evaluated. Valid modes are: %s", valid_query_modes)
-
-	query_mode := flag.String("query-mode", query.QUERYSET_MODE_ALL, desc_query_modes)
-
 	var procs = flag.Int("processes", (runtime.NumCPU() * 2), "The number of concurrent processes to index data with")
 
 	flag.Parse()
+
+	ctx := context.Background()
 
 	runtime.GOMAXPROCS(*procs)
 
@@ -151,7 +133,7 @@ func main() {
 	if *supersedes || *all {
 
 		t, err := tables.NewSupersedesTableWithDatabase(db)
-		
+
 		if err != nil {
 			logger.Fatal("failed to create 'supersedes' table because %s", err)
 		}
@@ -313,16 +295,6 @@ func main() {
 		StrictAltFiles: *strict_alt_files,
 	}
 
-	if len(queries) > 0 {
-
-		qs := &query.QuerySet{
-			Queries: queries,
-			Mode:    *query_mode,
-		}
-
-		record_opts.QuerySet = qs
-	}
-
 	record_func := index.SQLiteFeaturesLoadRecordFunc(record_opts)
 
 	idx_opts := &sql_index.SQLiteIndexerOptions{
@@ -333,7 +305,6 @@ func main() {
 
 	if *index_relations {
 
-		ctx := context.Background()
 		r, err := reader.NewReader(ctx, *relations_uri)
 
 		if err != nil {
@@ -353,10 +324,10 @@ func main() {
 	idx.Timings = *timings
 	idx.Logger = logger
 
-	err = idx.IndexPaths(*mode, flag.Args())
+	err = idx.IndexPaths(ctx, *emitter_uri, flag.Args())
 
 	if err != nil {
-		logger.Fatal("Failed to index paths in %s mode because: %s", *mode, err)
+		logger.Fatal("Failed to index paths in %s mode because: %s", *emitter_uri, err)
 	}
 
 	os.Exit(0)
