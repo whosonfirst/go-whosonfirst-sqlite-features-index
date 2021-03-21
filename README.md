@@ -39,17 +39,17 @@ Usage of ./bin/wof-sqlite-index-features:
   -index-relations-reader-uri string
     	A valid go-reader.Reader URI from which to read data for a relations candidate.
   -iterator-uri string
-    	A valid whosonfirst/go-whosonfirst-iterate/emitter URI. Supported emitter URI schemes are: directory://,featurecollection://,file://,filelist://,geojsonl://,repo:// (default "repo://")
+    	A valid whosonfirst/go-whosonfirst-iterate/emitter URI. Supported emitter URI schemes are: directory://,featurecollection://,file://,filelist://,geojsonl://,git://,repo:// (default "repo://")
   -live-hard-die-fast
     	Enable various performance-related pragmas at the expense of possible (unlikely) database corruption (default true)
   -mode string
-    	A valid whosonfirst/go-whosonfirst-iterate/emitter URI. Supported emitter URI schemes are: directory://,featurecollection://,file://,filelist://,geojsonl://,repo://. THIS FLAG IS DEPRECATED, please use -iterator-uri instead. (default "repo://")	
+    	A valid whosonfirst/go-whosonfirst-iterate/emitter URI. Supported emitter URI schemes are: directory://,featurecollection://,file://,filelist://,geojsonl://,git://,repo://. THIS FLAG IS DEPRECATED, please use -iterator-uri instead. (default "repo://")
   -names
     	Index the 'names' table
   -optimize
     	Attempt to optimize the database before closing connection (default true)
   -processes int
-    	The number of concurrent processes to index data with (default 8)
+    	The number of concurrent processes to index data with (default 16)
   -properties
     	Index the 'properties' table
   -rtree
@@ -292,3 +292,4 @@ As of this writing individual tables are indexed atomically. There may be some i
 * https://github.com/whosonfirst/go-whosonfirst-sqlite-features
 * https://github.com/whosonfirst/go-whosonfirst-sqlite-index
 * https://github.com/whosonfirst/go-whosonfirst-iterate
+* https://github.com/whosonfirst/go-whosonfirst-iterate-git
