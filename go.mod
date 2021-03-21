@@ -8,6 +8,7 @@ require (
 	github.com/whosonfirst/go-reader-http v0.2.2
 	github.com/whosonfirst/go-whosonfirst-geojson-v2 v0.16.1
 	github.com/whosonfirst/go-whosonfirst-iterate v1.1.0
+	github.com/whosonfirst/go-whosonfirst-iterate-git v1.0.2
 	github.com/whosonfirst/go-whosonfirst-log v0.1.0
 	github.com/whosonfirst/go-whosonfirst-sqlite v0.1.7
 	github.com/whosonfirst/go-whosonfirst-sqlite-features v0.7.0
