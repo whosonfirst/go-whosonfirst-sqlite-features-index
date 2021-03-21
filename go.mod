@@ -6,7 +6,7 @@ require (
 	github.com/tidwall/gjson v1.6.8
 	github.com/whosonfirst/go-reader v0.5.0
 	github.com/whosonfirst/go-reader-http v0.2.2
-	github.com/whosonfirst/go-whosonfirst-geojson-v2 v0.16.0
+	github.com/whosonfirst/go-whosonfirst-geojson-v2 v0.16.1
 	github.com/whosonfirst/go-whosonfirst-iterate v1.1.0
 	github.com/whosonfirst/go-whosonfirst-log v0.1.0
 	github.com/whosonfirst/go-whosonfirst-sqlite v0.1.7
