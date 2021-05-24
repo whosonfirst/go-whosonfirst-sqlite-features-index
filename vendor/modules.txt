@@ -95,7 +95,7 @@ github.com/sfomuseum/go-edtf/re
 github.com/sfomuseum/go-edtf/tests
 # github.com/skelterjohn/geom v0.0.0-20180103142417-96f3e8a219c5
 github.com/skelterjohn/geom
-# github.com/tidwall/gjson v1.7.2
+# github.com/tidwall/gjson v1.8.0
 ## explicit
 github.com/tidwall/gjson
 # github.com/tidwall/match v1.0.3
@@ -133,7 +133,7 @@ github.com/whosonfirst/go-whosonfirst-geojson-v2/properties/whosonfirst
 github.com/whosonfirst/go-whosonfirst-geojson-v2/utils
 # github.com/whosonfirst/go-whosonfirst-hash v0.1.0
 github.com/whosonfirst/go-whosonfirst-hash
-# github.com/whosonfirst/go-whosonfirst-iterate v1.1.0
+# github.com/whosonfirst/go-whosonfirst-iterate v1.1.1
 ## explicit
 github.com/whosonfirst/go-whosonfirst-iterate/emitter
 github.com/whosonfirst/go-whosonfirst-iterate/filters
@@ -167,7 +167,7 @@ github.com/whosonfirst/go-whosonfirst-sqlite-features/tables
 # github.com/whosonfirst/go-whosonfirst-sqlite-index v1.0.0
 ## explicit
 github.com/whosonfirst/go-whosonfirst-sqlite-index
-# github.com/whosonfirst/go-whosonfirst-uri v0.2.0
+# github.com/whosonfirst/go-whosonfirst-uri v1.0.1
 ## explicit
 github.com/whosonfirst/go-whosonfirst-uri
 # github.com/whosonfirst/walk v0.0.1
