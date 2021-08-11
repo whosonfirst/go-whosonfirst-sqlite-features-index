@@ -4,12 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/aaronland/go-sqlite"
 	"github.com/tidwall/gjson"
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2"
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2/feature"
 	"github.com/whosonfirst/go-whosonfirst-iterate/emitter"
-	"github.com/whosonfirst/go-whosonfirst-sqlite"
 	wof_tables "github.com/whosonfirst/go-whosonfirst-sqlite-features/tables"
 	sql_index "github.com/whosonfirst/go-whosonfirst-sqlite-index"
 	"github.com/whosonfirst/go-whosonfirst-uri"
@@ -92,7 +92,7 @@ func SQLiteFeaturesIndexRelationsFuncWithOptions(opts *SQLiteFeaturesIndexRelati
 
 	cb := func(ctx context.Context, db sqlite.Database, tables []sqlite.Table, record interface{}) error {
 
-		geojson_t, err := wof_tables.NewGeoJSONTable()
+		geojson_t, err := wof_tables.NewGeoJSONTable(ctx)
 
 		if err != nil {
 			return err
@@ -211,7 +211,7 @@ func SQLiteFeaturesIndexRelationsFuncWithOptions(opts *SQLiteFeaturesIndexRelati
 
 			for _, t := range tables {
 
-				err = t.IndexRecord(db, record)
+				err = t.IndexRecord(ctx, db, record)
 
 				if err != nil {
 					return err

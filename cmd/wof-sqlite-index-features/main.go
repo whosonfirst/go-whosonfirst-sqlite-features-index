@@ -2,21 +2,21 @@ package main
 
 import (
 	_ "github.com/whosonfirst/go-reader-http"
-	_ "github.com/whosonfirst/go-whosonfirst-iterate-git"	
+	_ "github.com/whosonfirst/go-whosonfirst-iterate-git"
 )
 
 import (
 	"context"
 	"flag"
 	"fmt"
+	"github.com/aaronland/go-sqlite"
+	"github.com/aaronland/go-sqlite/database"
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-whosonfirst-iterate/emitter"
 	"github.com/whosonfirst/go-whosonfirst-log"
-	"github.com/whosonfirst/go-whosonfirst-sqlite"
 	"github.com/whosonfirst/go-whosonfirst-sqlite-features-index"
 	"github.com/whosonfirst/go-whosonfirst-sqlite-features/tables"
 	sql_index "github.com/whosonfirst/go-whosonfirst-sqlite-index"
-	"github.com/whosonfirst/go-whosonfirst-sqlite/database"
 	"io"
 	"os"
 	"runtime"
@@ -30,7 +30,7 @@ func main() {
 
 	iterator_uri := flag.String("iterator-uri", "repo://", iterator_desc)
 
-	mode_desc := fmt.Sprintf("%s. THIS FLAG IS DEPRECATED, please use -iterator-uri instead.", iterator_desc)	
+	mode_desc := fmt.Sprintf("%s. THIS FLAG IS DEPRECATED, please use -iterator-uri instead.", iterator_desc)
 	mode := flag.String("mode", "repo://", mode_desc)
 
 	dsn := flag.String("dsn", ":memory:", "")
@@ -63,11 +63,11 @@ func main() {
 
 	flag.Parse()
 
+	ctx := context.Background()
+
 	if *iterator_uri == "" {
 		*iterator_uri = *mode
 	}
-	
-	ctx := context.Background()
 
 	runtime.GOMAXPROCS(*procs)
 
@@ -80,7 +80,7 @@ func main() {
 		logger.Fatal("you asked to index geometries but specified the '%s' driver instead of spatialite", *driver)
 	}
 
-	db, err := database.NewDBWithDriver(*driver, *dsn)
+	db, err := database.NewDBWithDriver(ctx, *driver, *dsn)
 
 	if err != nil {
 		logger.Fatal("unable to create database (%s) because %s", *dsn, err)
@@ -128,7 +128,7 @@ func main() {
 
 		geojson_opts.IndexAltFiles = *alt_files
 
-		gt, err := tables.NewGeoJSONTableWithDatabaseAndOptions(db, geojson_opts)
+		gt, err := tables.NewGeoJSONTableWithDatabaseAndOptions(ctx, db, geojson_opts)
 
 		if err != nil {
 			logger.Fatal("failed to create 'geojson' table because %s", err)
@@ -139,7 +139,7 @@ func main() {
 
 	if *supersedes || *all {
 
-		t, err := tables.NewSupersedesTableWithDatabase(db)
+		t, err := tables.NewSupersedesTableWithDatabase(ctx, db)
 
 		if err != nil {
 			logger.Fatal("failed to create 'supersedes' table because %s", err)
@@ -158,7 +158,7 @@ func main() {
 
 		rtree_opts.IndexAltFiles = *alt_files
 
-		gt, err := tables.NewRTreeTableWithDatabaseAndOptions(db, rtree_opts)
+		gt, err := tables.NewRTreeTableWithDatabaseAndOptions(ctx, db, rtree_opts)
 
 		if err != nil {
 			logger.Fatal("failed to create 'rtree' table because %s", err)
@@ -177,7 +177,7 @@ func main() {
 
 		geometry_opts.IndexAltFiles = *alt_files
 
-		gt, err := tables.NewGeometryTableWithDatabaseAndOptions(db, geometry_opts)
+		gt, err := tables.NewGeometryTableWithDatabaseAndOptions(ctx, db, geometry_opts)
 
 		if err != nil {
 			logger.Fatal("failed to create 'geometry' table because %s", err)
@@ -196,7 +196,7 @@ func main() {
 
 		properties_opts.IndexAltFiles = *alt_files
 
-		gt, err := tables.NewPropertiesTableWithDatabaseAndOptions(db, properties_opts)
+		gt, err := tables.NewPropertiesTableWithDatabaseAndOptions(ctx, db, properties_opts)
 
 		if err != nil {
 			logger.Fatal("failed to create 'properties' table because %s", err)
@@ -215,7 +215,7 @@ func main() {
 
 		spr_opts.IndexAltFiles = *alt_files
 
-		st, err := tables.NewSPRTableWithDatabaseAndOptions(db, spr_opts)
+		st, err := tables.NewSPRTableWithDatabaseAndOptions(ctx, db, spr_opts)
 
 		if err != nil {
 			logger.Fatal("failed to create 'spr' table because %s", err)
@@ -226,7 +226,7 @@ func main() {
 
 	if *names || *all {
 
-		nm, err := tables.NewNamesTableWithDatabase(db)
+		nm, err := tables.NewNamesTableWithDatabase(ctx, db)
 
 		if err != nil {
 			logger.Fatal("failed to create 'names' table because %s", err)
@@ -237,7 +237,7 @@ func main() {
 
 	if *ancestors || *all {
 
-		an, err := tables.NewAncestorsTableWithDatabase(db)
+		an, err := tables.NewAncestorsTableWithDatabase(ctx, db)
 
 		if err != nil {
 			logger.Fatal("failed to create 'ancestors' table because %s", err)
@@ -248,7 +248,7 @@ func main() {
 
 	if *concordances || *all {
 
-		cn, err := tables.NewConcordancesTableWithDatabase(db)
+		cn, err := tables.NewConcordancesTableWithDatabase(ctx, db)
 
 		if err != nil {
 			logger.Fatal("failed to create 'concordances' table because %s", err)
@@ -270,7 +270,7 @@ func main() {
 
 		geometries_opts.IndexAltFiles = *alt_files
 
-		gm, err := tables.NewGeometriesTableWithDatabaseAndOptions(db, geometries_opts)
+		gm, err := tables.NewGeometriesTableWithDatabaseAndOptions(ctx, db, geometries_opts)
 
 		if err != nil {
 			logger.Fatal("failed to create 'geometries' table because %s", err)
@@ -285,7 +285,7 @@ func main() {
 
 	if *search {
 
-		st, err := tables.NewSearchTableWithDatabase(db)
+		st, err := tables.NewSearchTableWithDatabase(ctx, db)
 
 		if err != nil {
 			logger.Fatal("failed to create 'search' table because %s", err)

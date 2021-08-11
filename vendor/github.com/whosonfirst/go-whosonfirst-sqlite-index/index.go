@@ -5,7 +5,7 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-iterate/emitter"
 	"github.com/whosonfirst/go-whosonfirst-iterate/iterator"
 	"github.com/whosonfirst/go-whosonfirst-log"
-	"github.com/whosonfirst/go-whosonfirst-sqlite"
+	"github.com/aaronland/go-sqlite"
 	"io"
 	"sync"
 	"sync/atomic"
@@ -69,7 +69,7 @@ func NewSQLiteIndexer(opts *SQLiteIndexerOptions) (*SQLiteIndexer, error) {
 
 			t1 := time.Now()
 
-			err = t.IndexRecord(db, record)
+			err = t.IndexRecord(ctx, db, record)
 
 			if err != nil {
 				logger.Warning("failed to index feature (%s) in '%s' table because %s", path, t.Name(), err)
