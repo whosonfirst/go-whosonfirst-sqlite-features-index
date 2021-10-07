@@ -2,7 +2,7 @@ package main
 
 import (
 	_ "github.com/whosonfirst/go-reader-http"
-	_ "github.com/whosonfirst/go-whosonfirst-iterate-git"
+	_ "github.com/whosonfirst/go-whosonfirst-iterate-git/v2"
 )
 
 import (
@@ -12,11 +12,11 @@ import (
 	"github.com/aaronland/go-sqlite"
 	"github.com/aaronland/go-sqlite/database"
 	"github.com/whosonfirst/go-reader"
-	"github.com/whosonfirst/go-whosonfirst-iterate/emitter"
+	"github.com/whosonfirst/go-whosonfirst-iterate/v2/emitter"
 	"github.com/whosonfirst/go-whosonfirst-log"
 	"github.com/whosonfirst/go-whosonfirst-sqlite-features-index"
 	"github.com/whosonfirst/go-whosonfirst-sqlite-features/tables"
-	sql_index "github.com/whosonfirst/go-whosonfirst-sqlite-index"
+	sql_index "github.com/whosonfirst/go-whosonfirst-sqlite-index/v2"
 	"io"
 	"os"
 	"runtime"
@@ -26,7 +26,7 @@ import (
 func main() {
 
 	valid_schemes := strings.Join(emitter.Schemes(), ",")
-	iterator_desc := fmt.Sprintf("A valid whosonfirst/go-whosonfirst-iterate/emitter URI. Supported emitter URI schemes are: %s", valid_schemes)
+	iterator_desc := fmt.Sprintf("A valid whosonfirst/go-whosonfirst-iterate/v2 URI. Supported emitter URI schemes are: %s", valid_schemes)
 
 	iterator_uri := flag.String("iterator-uri", "repo://", iterator_desc)
 

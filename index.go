@@ -9,9 +9,8 @@ import (
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2"
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2/feature"
-	"github.com/whosonfirst/go-whosonfirst-iterate/emitter"
 	wof_tables "github.com/whosonfirst/go-whosonfirst-sqlite-features/tables"
-	sql_index "github.com/whosonfirst/go-whosonfirst-sqlite-index"
+	sql_index "github.com/whosonfirst/go-whosonfirst-sqlite-index/v2"
 	"github.com/whosonfirst/go-whosonfirst-uri"
 	"github.com/whosonfirst/warning"
 	"io"
@@ -30,19 +29,13 @@ type SQLiteFeaturesIndexRelationsFuncOptions struct {
 
 func SQLiteFeaturesLoadRecordFunc(opts *SQLiteFeaturesLoadRecordFuncOptions) sql_index.SQLiteIndexerLoadRecordFunc {
 
-	cb := func(ctx context.Context, fh io.ReadSeeker, args ...interface{}) (interface{}, error) {
+	cb := func(ctx context.Context, path string, fh io.ReadSeeker, args ...interface{}) (interface{}, error) {
 
 		select {
 
 		case <-ctx.Done():
 			return nil, nil
 		default:
-
-			path, err := emitter.PathForContext(ctx)
-
-			if err != nil {
-				return nil, err
-			}
 
 			i, err := feature.LoadWOFFeatureFromReader(fh)
 
