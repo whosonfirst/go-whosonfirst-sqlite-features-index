@@ -18,15 +18,21 @@ import (
 	"sync"
 )
 
+// SQLiteFeaturesLoadRecordFuncOptions is a struct to define options when loading Who's On First feature records.
 type SQLiteFeaturesLoadRecordFuncOptions struct {
+	// StrictAltFiles is a boolean flag indicating whether the failure to load or parse an alternate geometry file should trigger a critical error.
 	StrictAltFiles bool
 }
 
+// SQLiteFeaturesIndexRelationsFuncOptions
 type SQLiteFeaturesIndexRelationsFuncOptions struct {
+	// Reader is a valid `whosonfirst/go-reader` instance used to load Who's On First feature data
 	Reader reader.Reader
+	// Strict is a boolean flag indicating whether the failure to load or parse feature record should trigger a critical error.
 	Strict bool
 }
 
+// SQLiteFeaturesLoadRecordFunc
 func SQLiteFeaturesLoadRecordFunc(opts *SQLiteFeaturesLoadRecordFuncOptions) sql_index.SQLiteIndexerLoadRecordFunc {
 
 	cb := func(ctx context.Context, path string, fh io.ReadSeeker, args ...interface{}) (interface{}, error) {
