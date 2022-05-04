@@ -11,7 +11,7 @@ require (
 	github.com/whosonfirst/go-whosonfirst-iterate-git/v2 v2.1.0
 	github.com/whosonfirst/go-whosonfirst-iterate/v2 v2.0.2
 	github.com/whosonfirst/go-whosonfirst-log v0.1.0
-	github.com/whosonfirst/go-whosonfirst-sqlite-features v0.9.3
+	github.com/whosonfirst/go-whosonfirst-sqlite-features v0.9.4
 	github.com/whosonfirst/go-whosonfirst-sqlite-index/v2 v2.0.1
 	github.com/whosonfirst/go-whosonfirst-uri v1.2.0
 	github.com/whosonfirst/warning v0.1.1
