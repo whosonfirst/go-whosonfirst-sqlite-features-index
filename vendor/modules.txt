@@ -180,13 +180,16 @@ github.com/whosonfirst/go-whosonfirst-sources
 github.com/whosonfirst/go-whosonfirst-sources/sources
 # github.com/whosonfirst/go-whosonfirst-spr/v2 v2.0.0
 github.com/whosonfirst/go-whosonfirst-spr/v2
-# github.com/whosonfirst/go-whosonfirst-sqlite-features v0.9.4
+# github.com/whosonfirst/go-whosonfirst-sqlite-features v0.9.3
 ## explicit
 github.com/whosonfirst/go-whosonfirst-sqlite-features
 github.com/whosonfirst/go-whosonfirst-sqlite-features/tables
 # github.com/whosonfirst/go-whosonfirst-sqlite-index/v2 v2.0.1
 ## explicit
 github.com/whosonfirst/go-whosonfirst-sqlite-index/v2
+# github.com/whosonfirst/go-whosonfirst-sqlite-index/v3 v3.0.0
+## explicit
+github.com/whosonfirst/go-whosonfirst-sqlite-index/v3
 # github.com/whosonfirst/go-whosonfirst-uri v1.2.0
 ## explicit
 github.com/whosonfirst/go-whosonfirst-uri

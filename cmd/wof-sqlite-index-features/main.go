@@ -13,11 +13,10 @@ import (
 	"github.com/aaronland/go-sqlite/database"
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-whosonfirst-iterate/v2/emitter"
-	"github.com/whosonfirst/go-whosonfirst-log"
+	"log"
 	"github.com/whosonfirst/go-whosonfirst-sqlite-features-index"
 	"github.com/whosonfirst/go-whosonfirst-sqlite-features/tables"
-	sql_index "github.com/whosonfirst/go-whosonfirst-sqlite-index/v2"
-	"io"
+	sql_index "github.com/whosonfirst/go-whosonfirst-sqlite-index/v3"
 	"os"
 	"runtime"
 	"strings"
@@ -73,13 +72,10 @@ func main() {
 
 	runtime.GOMAXPROCS(*procs)
 
-	logger := log.SimpleWOFLogger()
-
-	stdout := io.Writer(os.Stdout)
-	logger.AddLogger(stdout, "status")
+	logger := log.Default()
 
 	if *geometries && *driver != "spatialite" {
-		logger.Fatal("you asked to index geometries but specified the '%s' driver instead of spatialite", *driver)
+		logger.Fatalf("You asked to index geometries but specified the '%s' driver instead of spatialite", *driver)
 	}
 
 	if *spatial_tables {
@@ -92,7 +88,7 @@ func main() {
 	db, err := database.NewDBWithDriver(ctx, *driver, *dsn)
 
 	if err != nil {
-		logger.Fatal("unable to create database (%s) because %s", *dsn, err)
+		logger.Fatalf("Unable to create database (%s) because %v", *dsn, err)
 	}
 
 	// optimize query performance
@@ -104,15 +100,13 @@ func main() {
 			conn, err := db.Conn()
 
 			if err != nil {
-				logger.Fatal("Unable to optimize, because %s", err)
+				logger.Fatalf("Unable to optimize, because %v", err)
 			}
-
-			logger.Info("Optimizing database...")
 
 			_, err = conn.Exec("PRAGMA optimize")
 
 			if err != nil {
-				logger.Fatal("Unable to optimize, because %s", err)
+				logger.Fatalf("Unable to optimize, because %v", err)
 			}
 		}()
 	}
@@ -124,7 +118,7 @@ func main() {
 		err = db.LiveHardDieFast()
 
 		if err != nil {
-			logger.Fatal("Unable to live hard and die fast so just dying fast instead, because %s", err)
+			logger.Fatalf("Unable to live hard and die fast so just dying fast instead, because %v", err)
 		}
 	}
 
@@ -135,7 +129,7 @@ func main() {
 		geojson_opts, err := tables.DefaultGeoJSONTableOptions()
 
 		if err != nil {
-			logger.Fatal("failed to create 'geojson' table options because %s", err)
+			logger.Fatalf("failed to create 'geojson' table options because %s", err)
 		}
 
 		geojson_opts.IndexAltFiles = *alt_files
@@ -143,7 +137,7 @@ func main() {
 		gt, err := tables.NewGeoJSONTableWithDatabaseAndOptions(ctx, db, geojson_opts)
 
 		if err != nil {
-			logger.Fatal("failed to create 'geojson' table because %s", err)
+			logger.Fatalf("failed to create 'geojson' table because %s", err)
 		}
 
 		to_index = append(to_index, gt)
@@ -154,7 +148,7 @@ func main() {
 		t, err := tables.NewSupersedesTableWithDatabase(ctx, db)
 
 		if err != nil {
-			logger.Fatal("failed to create 'supersedes' table because %s", err)
+			logger.Fatalf("failed to create 'supersedes' table because %s", err)
 		}
 
 		to_index = append(to_index, t)
@@ -165,7 +159,7 @@ func main() {
 		rtree_opts, err := tables.DefaultRTreeTableOptions()
 
 		if err != nil {
-			logger.Fatal("failed to create 'rtree' table options because %s", err)
+			logger.Fatalf("failed to create 'rtree' table options because %s", err)
 		}
 
 		rtree_opts.IndexAltFiles = *alt_files
@@ -173,7 +167,7 @@ func main() {
 		gt, err := tables.NewRTreeTableWithDatabaseAndOptions(ctx, db, rtree_opts)
 
 		if err != nil {
-			logger.Fatal("failed to create 'rtree' table because %s", err)
+			logger.Fatalf("failed to create 'rtree' table because %s", err)
 		}
 
 		to_index = append(to_index, gt)
@@ -184,7 +178,7 @@ func main() {
 		geometry_opts, err := tables.DefaultGeometryTableOptions()
 
 		if err != nil {
-			logger.Fatal("failed to create 'geometry' table options because %s", err)
+			logger.Fatalf("failed to create 'geometry' table options because %s", err)
 		}
 
 		geometry_opts.IndexAltFiles = *alt_files
@@ -192,7 +186,7 @@ func main() {
 		gt, err := tables.NewGeometryTableWithDatabaseAndOptions(ctx, db, geometry_opts)
 
 		if err != nil {
-			logger.Fatal("failed to create 'geometry' table because %s", err)
+			logger.Fatalf("failed to create 'geometry' table because %s", err)
 		}
 
 		to_index = append(to_index, gt)
@@ -203,7 +197,7 @@ func main() {
 		properties_opts, err := tables.DefaultPropertiesTableOptions()
 
 		if err != nil {
-			logger.Fatal("failed to create 'properties' table options because %s", err)
+			logger.Fatalf("failed to create 'properties' table options because %s", err)
 		}
 
 		properties_opts.IndexAltFiles = *alt_files
@@ -211,7 +205,7 @@ func main() {
 		gt, err := tables.NewPropertiesTableWithDatabaseAndOptions(ctx, db, properties_opts)
 
 		if err != nil {
-			logger.Fatal("failed to create 'properties' table because %s", err)
+			logger.Fatalf("failed to create 'properties' table because %s", err)
 		}
 
 		to_index = append(to_index, gt)
@@ -222,7 +216,7 @@ func main() {
 		spr_opts, err := tables.DefaultSPRTableOptions()
 
 		if err != nil {
-			logger.Fatal("Failed to create 'spr' table options because %v", err)
+			logger.Fatalf("Failed to create 'spr' table options because %v", err)
 		}
 
 		spr_opts.IndexAltFiles = *alt_files
@@ -230,7 +224,7 @@ func main() {
 		st, err := tables.NewSPRTableWithDatabaseAndOptions(ctx, db, spr_opts)
 
 		if err != nil {
-			logger.Fatal("failed to create 'spr' table because %s", err)
+			logger.Fatalf("failed to create 'spr' table because %s", err)
 		}
 
 		to_index = append(to_index, st)
@@ -241,7 +235,7 @@ func main() {
 		nm, err := tables.NewNamesTableWithDatabase(ctx, db)
 
 		if err != nil {
-			logger.Fatal("failed to create 'names' table because %s", err)
+			logger.Fatalf("failed to create 'names' table because %s", err)
 		}
 
 		to_index = append(to_index, nm)
@@ -252,7 +246,7 @@ func main() {
 		an, err := tables.NewAncestorsTableWithDatabase(ctx, db)
 
 		if err != nil {
-			logger.Fatal("failed to create 'ancestors' table because %s", err)
+			logger.Fatalf("failed to create 'ancestors' table because %s", err)
 		}
 
 		to_index = append(to_index, an)
@@ -263,7 +257,7 @@ func main() {
 		cn, err := tables.NewConcordancesTableWithDatabase(ctx, db)
 
 		if err != nil {
-			logger.Fatal("failed to create 'concordances' table because %s", err)
+			logger.Fatalf("failed to create 'concordances' table because %s", err)
 		}
 
 		to_index = append(to_index, cn)
@@ -277,7 +271,7 @@ func main() {
 		geometries_opts, err := tables.DefaultGeometriesTableOptions()
 
 		if err != nil {
-			logger.Fatal("failed to create 'geometries' table options because %s", err)
+			logger.Fatalf("failed to create 'geometries' table options because %v", err)
 		}
 
 		geometries_opts.IndexAltFiles = *alt_files
@@ -285,7 +279,7 @@ func main() {
 		gm, err := tables.NewGeometriesTableWithDatabaseAndOptions(ctx, db, geometries_opts)
 
 		if err != nil {
-			logger.Fatal("failed to create 'geometries' table because %s", err)
+			logger.Fatalf("failed to create 'geometries' table because %v", err)
 		}
 
 		to_index = append(to_index, gm)
@@ -300,14 +294,14 @@ func main() {
 		st, err := tables.NewSearchTableWithDatabase(ctx, db)
 
 		if err != nil {
-			logger.Fatal("failed to create 'search' table because %s", err)
+			logger.Fatalf("failed to create 'search' table because %v", err)
 		}
 
 		to_index = append(to_index, st)
 	}
 
 	if len(to_index) == 0 {
-		logger.Fatal("You forgot to specify which (any) tables to index")
+		logger.Fatalf("You forgot to specify which (any) tables to index")
 	}
 
 	record_opts := &index.SQLiteFeaturesLoadRecordFuncOptions{
@@ -327,7 +321,7 @@ func main() {
 		r, err := reader.NewReader(ctx, *relations_uri)
 
 		if err != nil {
-			logger.Fatal("Failed to load reader (%s), %v", *relations_uri, err)
+			logger.Fatalf("Failed to load reader (%s), %v", *relations_uri, err)
 		}
 
 		belongsto_func := index.SQLiteFeaturesIndexRelationsFunc(r)
@@ -337,7 +331,7 @@ func main() {
 	idx, err := sql_index.NewSQLiteIndexer(idx_opts)
 
 	if err != nil {
-		logger.Fatal("failed to create sqlite indexer because %s", err)
+		logger.Fatalf("failed to create sqlite indexer because %v", err)
 	}
 
 	idx.Timings = *timings
@@ -346,7 +340,7 @@ func main() {
 	err = idx.IndexPaths(ctx, *iterator_uri, flag.Args())
 
 	if err != nil {
-		logger.Fatal("Failed to index paths in %s mode because: %s", *iterator_uri, err)
+		logger.Fatalf("Failed to index paths in %s mode because: %s", *iterator_uri, err)
 	}
 
 	os.Exit(0)
