@@ -62,7 +62,7 @@ func TestIndexFeatures(t *testing.T) {
 		LoadRecordFunc: record_func,
 	}
 
-	reader_uri := fmt.Sprintf("fs://%s", path_relations)
+	reader_uri := fmt.Sprintf("fs://%s?allow_bz2=1", path_relations)
 	
 	r, err := reader.NewReader(ctx, reader_uri)
 	
@@ -79,6 +79,9 @@ func TestIndexFeatures(t *testing.T) {
 		t.Fatalf("Failed to create sqlite indexer because %v", err)
 	}
 
+	// Blocked on changes to go-whosonfirst-sqlite-features
+	// See 'props' branch for details
+	
 	err = idx.IndexURIs(ctx, "directory://", path_data)
 
 	if err != nil {
