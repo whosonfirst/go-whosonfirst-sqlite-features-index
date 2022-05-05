@@ -49,6 +49,8 @@ func main() {
 	spr := flag.Bool("spr", false, "Index the 'spr' table")
 	supersedes := flag.Bool("supersedes", false, "Index the 'supersedes' table")
 
+	spatial_tables := flag.Bool("spatial-tables", false, "If true then index the necessary tables for use with the whosonfirst/go-whosonfirst-spatial-sqlite package.")
+
 	live_hard := flag.Bool("live-hard-die-fast", true, "Enable various performance-related pragmas at the expense of possible (unlikely) database corruption")
 	timings := flag.Bool("timings", false, "Display timings during and after indexing")
 	optimize := flag.Bool("optimize", true, "Attempt to optimize the database before closing connection")
@@ -80,6 +82,13 @@ func main() {
 		logger.Fatal("you asked to index geometries but specified the '%s' driver instead of spatialite", *driver)
 	}
 
+	if *spatial_tables {
+		*rtree = true
+		*geojson = true
+		*properties = true
+		*spr = true
+	}
+
 	db, err := database.NewDBWithDriver(ctx, *driver, *dsn)
 
 	if err != nil {
@@ -91,7 +100,9 @@ func main() {
 	if *optimize {
 
 		defer func() {
+
 			conn, err := db.Conn()
+
 			if err != nil {
 				logger.Fatal("Unable to optimize, because %s", err)
 			}
@@ -99,6 +110,7 @@ func main() {
 			logger.Info("Optimizing database...")
 
 			_, err = conn.Exec("PRAGMA optimize")
+
 			if err != nil {
 				logger.Fatal("Unable to optimize, because %s", err)
 			}
