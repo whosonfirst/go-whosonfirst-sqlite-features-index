@@ -1,6 +1,12 @@
 # go-whosonfirst-sqlite-features-index
 
-Go package for indexing Who's On First features in SQLite databases.
+Go package for indexing Who's On First features in SQLite databases using the `whosonfirst/go-whosonfirst-sqlite-index` and `whosonfirst/go-whosonfirst-sqlite-features` packages.
+
+The `go-whosonfirst-sqlite-index` package indexes SQLite databases using table constucts defined in the `aaronland/go-sqlite` package and records defined by the `whosonfirst/go-whosonfirst-iterate/v2` package
+
+## Documentation
+
+[![Go Reference](https://pkg.go.dev/badge/github.com/whosonfirst/go-whosonfirst-sqlite-features-index.svg)](https://pkg.go.dev/github.com/whosonfirst/go-whosonfirst-sqlite-features-index)
 
 ## Tools
 
@@ -288,8 +294,7 @@ As of this writing individual tables are indexed atomically. There may be some i
 
 ## See also
 
-* https://github.com/whosonfirst/go-whosonfirst-sqlite
+* https://github.com/aaronland/go-sqlite
 * https://github.com/whosonfirst/go-whosonfirst-sqlite-features
 * https://github.com/whosonfirst/go-whosonfirst-sqlite-index
-* https://github.com/whosonfirst/go-whosonfirst-iterate
-* https://github.com/whosonfirst/go-whosonfirst-iterate-git
+* https://github.com/whosonfirst/go-whosonfirst-iterate/v2

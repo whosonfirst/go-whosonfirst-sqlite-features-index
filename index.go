@@ -2,17 +2,15 @@ package index
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"github.com/aaronland/go-sqlite"
 	"github.com/tidwall/gjson"
 	"github.com/whosonfirst/go-reader"
-	"github.com/whosonfirst/go-whosonfirst-geojson-v2"
-	"github.com/whosonfirst/go-whosonfirst-geojson-v2/feature"
+	"github.com/whosonfirst/go-whosonfirst-feature/geometry"
+	"github.com/whosonfirst/go-whosonfirst-feature/properties"
 	wof_tables "github.com/whosonfirst/go-whosonfirst-sqlite-features/tables"
 	sql_index "github.com/whosonfirst/go-whosonfirst-sqlite-index/v3"
 	"github.com/whosonfirst/go-whosonfirst-uri"
-	"github.com/whosonfirst/warning"
 	"io"
 	"log"
 	"sync"
@@ -32,51 +30,46 @@ type SQLiteFeaturesIndexRelationsFuncOptions struct {
 	Strict bool
 }
 
-// SQLiteFeaturesLoadRecordFunc
+// SQLiteFeaturesLoadRecordFunc returns a `go-whosonfirst-sqlite-index/v3.SQLiteIndexerLoadRecordFunc` callback
+// function that will ensure the the record being processed is a valid Who's On First GeoJSON Feature record.
 func SQLiteFeaturesLoadRecordFunc(opts *SQLiteFeaturesLoadRecordFuncOptions) sql_index.SQLiteIndexerLoadRecordFunc {
 
-	cb := func(ctx context.Context, path string, fh io.ReadSeeker, args ...interface{}) (interface{}, error) {
+	cb := func(ctx context.Context, path string, r io.ReadSeeker, args ...interface{}) (interface{}, error) {
 
 		select {
 
 		case <-ctx.Done():
 			return nil, nil
 		default:
-
-			i, err := feature.LoadWOFFeatureFromReader(fh)
-
-			if err != nil && !warning.IsWarning(err) {
-
-				_, err := fh.Seek(0, 0)
-
-				if err != nil {
-					return nil, err
-				}
-
-				alt, alt_err := feature.LoadWOFAltFeatureFromReader(fh)
-
-				if alt_err != nil && !warning.IsWarning(alt_err) {
-
-					msg := fmt.Sprintf("Unable to load %s, because %s (%s)", path, alt_err, err)
-
-					if !opts.StrictAltFiles {
-						log.Printf("%s - SKIPPING\n", msg)
-						return nil, nil
-					}
-
-					return nil, errors.New(msg)
-				}
-
-				i = alt
-			}
-
-			return i, nil
+			// pass
 		}
+
+		body, err := io.ReadAll(r)
+
+		if err != nil {
+			return nil, fmt.Errorf("Failed read %s, %w", path, err)
+		}
+
+		_, err = properties.Id(body)
+
+		if err != nil {
+			return nil, fmt.Errorf("Failed to derive wof:id for %s, %w", path, err)
+		}
+
+		_, err = geometry.Geometry(body)
+
+		if err != nil {
+			return nil, fmt.Errorf("Failed to derive geometry for %s, %w", path, err)
+		}
+
+		return body, nil
 	}
 
 	return cb
 }
 
+// SQLiteFeaturesIndexRelationsFunc returns a `go-whosonfirst-sqlite-index/v3.SQLiteIndexerPostIndexFunc` callback
+// function used to index relations for a WOF record after that record has been successfully indexed.
 func SQLiteFeaturesIndexRelationsFunc(r reader.Reader) sql_index.SQLiteIndexerPostIndexFunc {
 
 	opts := &SQLiteFeaturesIndexRelationsFuncOptions{}
@@ -85,6 +78,9 @@ func SQLiteFeaturesIndexRelationsFunc(r reader.Reader) sql_index.SQLiteIndexerPo
 	return SQLiteFeaturesIndexRelationsFuncWithOptions(opts)
 }
 
+// SQLiteFeaturesIndexRelationsFuncWithOptions returns a `go-whosonfirst-sqlite-index/v3.SQLiteIndexerPostIndexFunc` callback
+// function used to index relations for a WOF record after that record has been successfully indexed, but with custom
+// `SQLiteFeaturesIndexRelationsFuncOptions` options defined in 'opts'.
 func SQLiteFeaturesIndexRelationsFuncWithOptions(opts *SQLiteFeaturesIndexRelationsFuncOptions) sql_index.SQLiteIndexerPostIndexFunc {
 
 	seen := new(sync.Map)
@@ -94,20 +90,18 @@ func SQLiteFeaturesIndexRelationsFuncWithOptions(opts *SQLiteFeaturesIndexRelati
 		geojson_t, err := wof_tables.NewGeoJSONTable(ctx)
 
 		if err != nil {
-			return err
+			return fmt.Errorf("Failed to create new GeoJSON table, %w", err)
 		}
 
 		conn, err := db.Conn()
 
 		if err != nil {
-			return err
+			return fmt.Errorf("Failed to establish database connection, %v", err)
 		}
 
-		f := record.(geojson.Feature)
-		body := f.Bytes()
+		body := record.([]byte)
 
 		relations := make(map[int64]bool)
-		to_index := make([]geojson.Feature, 0)
 
 		candidates := []string{
 			"properties.wof:belongsto",
@@ -158,7 +152,7 @@ func SQLiteFeaturesIndexRelationsFuncWithOptions(opts *SQLiteFeaturesIndexRelati
 			err = row.Scan(&count)
 
 			if err != nil {
-				return err
+				return fmt.Errorf("Failed to count records for ID %d, %v", id, err)
 			}
 
 			if count != 0 {
@@ -168,7 +162,7 @@ func SQLiteFeaturesIndexRelationsFuncWithOptions(opts *SQLiteFeaturesIndexRelati
 			rel_path, err := uri.Id2RelPath(id)
 
 			if err != nil {
-				return err
+				return fmt.Errorf("Failed to determine relative path for %d, %v", id, err)
 			}
 
 			fh, err := opts.Reader.Read(ctx, rel_path)
@@ -176,7 +170,7 @@ func SQLiteFeaturesIndexRelationsFuncWithOptions(opts *SQLiteFeaturesIndexRelati
 			if err != nil {
 
 				if opts.Strict {
-					return err
+					return fmt.Errorf("Failed to open %s, %v", rel_path, err)
 				}
 
 				log.Printf("Failed to read '%s' because '%v'. Strict mode is disabled so skipping\n", rel_path, err)
@@ -185,35 +179,18 @@ func SQLiteFeaturesIndexRelationsFuncWithOptions(opts *SQLiteFeaturesIndexRelati
 
 			defer fh.Close()
 
-			ancestor, err := feature.LoadFeatureFromReader(fh)
+			ancestor, err := io.ReadAll(fh)
 
-			// check for warnings in case this record has a non-standard
-			// placetype (20201224/thisisaaronland)
-
-			if err != nil && !warning.IsWarning(err) {
-
-				if opts.Strict {
-					return err
-				}
-
-				log.Printf("Failed to load feature for '%s' because '%v'. Strict mode is disabled so skipping\n", rel_path, err)
-				continue
+			if err != nil {
+				return fmt.Errorf("Failed to read data for %s, %v", rel_path, err)
 			}
-
-			to_index = append(to_index, ancestor)
-
-			// TO DO: CHECK WHETHER TO INDEX ALT FILES FOR ANCESTOR(S)
-			// https://github.com/whosonfirst/go-whosonfirst-sqlite-features-index/issues/3
-		}
-
-		for _, record := range to_index {
 
 			for _, t := range tables {
 
-				err = t.IndexRecord(ctx, db, record)
+				err = t.IndexRecord(ctx, db, ancestor)
 
 				if err != nil {
-					return err
+					return fmt.Errorf("Failed to index ancestor (%s), %v", rel_path, err)
 				}
 			}
 		}
