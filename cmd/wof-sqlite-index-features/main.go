@@ -42,7 +42,6 @@ func main() {
 	geometries := flag.Bool("geometries", false, "Index the 'geometries' table (requires that libspatialite already be installed)")
 	names := flag.Bool("names", false, "Index the 'names' table")
 	rtree := flag.Bool("rtree", false, "Index the 'rtree' table")
-	geometry := flag.Bool("geometry", false, "Index the 'geometry' table")
 	properties := flag.Bool("properties", false, "Index the 'properties' table")
 	search := flag.Bool("search", false, "Index the 'search' table (using SQLite FTS4 full-text indexer)")
 	spr := flag.Bool("spr", false, "Index the 'spr' table")
@@ -168,25 +167,6 @@ func main() {
 
 		if err != nil {
 			logger.Fatalf("failed to create 'rtree' table because %s", err)
-		}
-
-		to_index = append(to_index, gt)
-	}
-
-	if *geometry || *all {
-
-		geometry_opts, err := tables.DefaultGeometryTableOptions()
-
-		if err != nil {
-			logger.Fatalf("failed to create 'geometry' table options because %s", err)
-		}
-
-		geometry_opts.IndexAltFiles = *alt_files
-
-		gt, err := tables.NewGeometryTableWithDatabaseAndOptions(ctx, db, geometry_opts)
-
-		if err != nil {
-			logger.Fatalf("failed to create 'geometry' table because %s", err)
 		}
 
 		to_index = append(to_index, gt)
@@ -337,7 +317,9 @@ func main() {
 	idx.Timings = *timings
 	idx.Logger = logger
 
-	err = idx.IndexPaths(ctx, *iterator_uri, flag.Args())
+	uris := flag.Args()
+	
+	err = idx.IndexURIs(ctx, *iterator_uri, uris...)
 
 	if err != nil {
 		logger.Fatalf("Failed to index paths in %s mode because: %s", *iterator_uri, err)
