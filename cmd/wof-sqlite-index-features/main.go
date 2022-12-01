@@ -1,5 +1,7 @@
 package main
 
+// To do: Move all of this in to app/query
+
 import (
 	_ "github.com/whosonfirst/go-reader-http"
 	_ "github.com/whosonfirst/go-whosonfirst-iterate-git/v2"
@@ -9,13 +11,12 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/aaronland/go-sqlite"
-	"github.com/aaronland/go-sqlite/database"
+	"github.com/aaronland/go-sqlite/v2"
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-whosonfirst-iterate/v2/emitter"
 	"github.com/whosonfirst/go-whosonfirst-sqlite-features-index"
-	"github.com/whosonfirst/go-whosonfirst-sqlite-features/tables"
-	sql_index "github.com/whosonfirst/go-whosonfirst-sqlite-index/v3"
+	"github.com/whosonfirst/go-whosonfirst-sqlite-features/v2/tables"
+	sql_index "github.com/whosonfirst/go-whosonfirst-sqlite-index/v4"
 	"log"
 	"os"
 	"runtime"
@@ -32,8 +33,7 @@ func main() {
 	mode_desc := fmt.Sprintf("%s. THIS FLAG IS DEPRECATED, please use -iterator-uri instead.", iterator_desc)
 	mode := flag.String("mode", "repo://", mode_desc)
 
-	dsn := flag.String("dsn", ":memory:", "")
-	driver := flag.String("driver", "sqlite3", "")
+	db_uri := flag.String("database-uri", "modernc://mem", "")
 
 	all := flag.Bool("all", false, "Index all tables (except the 'search' and 'geometries' tables which you need to specify explicitly)")
 	ancestors := flag.Bool("ancestors", false, "Index the 'ancestors' tables")
@@ -73,10 +73,6 @@ func main() {
 
 	logger := log.Default()
 
-	if *geometries && *driver != "spatialite" {
-		logger.Fatalf("You asked to index geometries but specified the '%s' driver instead of spatialite", *driver)
-	}
-
 	if *spatial_tables {
 		*rtree = true
 		*geojson = true
@@ -84,10 +80,10 @@ func main() {
 		*spr = true
 	}
 
-	db, err := database.NewDBWithDriver(ctx, *driver, *dsn)
+	db, err := sqlite.NewDatabase(ctx, *db_uri)
 
 	if err != nil {
-		logger.Fatalf("Unable to create database (%s) because %v", *dsn, err)
+		logger.Fatalf("Unable to create database (%s) because %v", *db_uri, err)
 	}
 
 	// optimize query performance
@@ -96,7 +92,7 @@ func main() {
 
 		defer func() {
 
-			conn, err := db.Conn()
+			conn, err := db.Conn(ctx)
 
 			if err != nil {
 				logger.Fatalf("Unable to optimize, because %v", err)
@@ -110,11 +106,11 @@ func main() {
 		}()
 	}
 
-	defer db.Close()
+	defer db.Close(ctx)
 
 	if *live_hard {
 
-		err = db.LiveHardDieFast()
+		err = sqlite.LiveHardDieFast(ctx, db)
 
 		if err != nil {
 			logger.Fatalf("Unable to live hard and die fast so just dying fast instead, because %v", err)
@@ -318,7 +314,7 @@ func main() {
 	idx.Logger = logger
 
 	uris := flag.Args()
-	
+
 	err = idx.IndexURIs(ctx, *iterator_uri, uris...)
 
 	if err != nil {
