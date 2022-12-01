@@ -2,14 +2,13 @@ package index
 
 import (
 	"context"
-	"testing"
-	"github.com/aaronland/go-sqlite"
 	"fmt"
-	"github.com/aaronland/go-sqlite/database"
-	"github.com/whosonfirst/go-whosonfirst-sqlite-features/tables"
-	sql_index "github.com/whosonfirst/go-whosonfirst-sqlite-index/v3"
+	"github.com/aaronland/go-sqlite/v2"
+	"github.com/whosonfirst/go-reader"
+	"github.com/whosonfirst/go-whosonfirst-sqlite-features/v2/tables"
+	sql_index "github.com/whosonfirst/go-whosonfirst-sqlite-index/v4"
 	"path/filepath"
-	"github.com/whosonfirst/go-reader"	
+	"testing"
 )
 
 func TestIndexFeatures(t *testing.T) {
@@ -23,15 +22,14 @@ func TestIndexFeatures(t *testing.T) {
 	}
 
 	path_relations := filepath.Join(path_fixtures, "relations")
-	path_data := filepath.Join(path_fixtures, "data")	
-	
-	driver := "sqlite3"
-	dsn := ":memory:"
+	path_data := filepath.Join(path_fixtures, "data")
 
-	db, err := database.NewDBWithDriver(ctx, driver, dsn)
+	db_uri := "modernc://mem"
+
+	db, err := sqlite.NewDatabase(ctx, db_uri)
 
 	if err != nil {
-		t.Fatalf("Unable to create database (%s) because %v", dsn, err)
+		t.Fatalf("Unable to create database (%s) because %v", db_uri, err)
 	}
 
 	to_index := make([]sqlite.Table, 0)
@@ -63,16 +61,16 @@ func TestIndexFeatures(t *testing.T) {
 	}
 
 	reader_uri := fmt.Sprintf("fs://%s?allow_bz2=1", path_relations)
-	
+
 	r, err := reader.NewReader(ctx, reader_uri)
-	
+
 	if err != nil {
 		t.Fatalf("Failed to load reader (%s), %v", reader_uri, err)
 	}
-	
+
 	belongsto_func := SQLiteFeaturesIndexRelationsFunc(r)
 	idx_opts.PostIndexFunc = belongsto_func
-	
+
 	idx, err := sql_index.NewSQLiteIndexer(idx_opts)
 
 	if err != nil {
@@ -81,11 +79,11 @@ func TestIndexFeatures(t *testing.T) {
 
 	// Blocked on changes to go-whosonfirst-sqlite-features
 	// See 'props' branch for details
-	
+
 	err = idx.IndexURIs(ctx, "directory://", path_data)
 
 	if err != nil {
 		t.Fatalf("Failed to index paths, %v", err)
 	}
-	
+
 }

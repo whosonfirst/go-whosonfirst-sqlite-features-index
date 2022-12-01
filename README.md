@@ -21,23 +21,18 @@ go build -mod vendor -o bin/wof-sqlite-index-features cmd/wof-sqlite-index-featu
 
 ```
 $> ./bin/wof-sqlite-index-features -h
-Usage of ./bin/wof-sqlite-index-features:
   -all
     	Index all tables (except the 'search' and 'geometries' tables which you need to specify explicitly)
   -ancestors
     	Index the 'ancestors' tables
   -concordances
     	Index the 'concordances' tables
-  -driver string
-    	 (default "sqlite3")
-  -dsn string
-    	 (default ":memory:")
+  -database-uri string
+    	 (default "modernc://mem")
   -geojson
     	Index the 'geojson' table
   -geometries
     	Index the 'geometries' table (requires that libspatialite already be installed)
-  -geometry
-    	Index the 'geometry' table
   -index-alt-files
     	Index alt geometries
   -index-relations
@@ -45,23 +40,23 @@ Usage of ./bin/wof-sqlite-index-features:
   -index-relations-reader-uri string
     	A valid go-reader.Reader URI from which to read data for a relations candidate.
   -iterator-uri string
-    	A valid whosonfirst/go-whosonfirst-iterate/emitter URI. Supported emitter URI schemes are: directory://,featurecollection://,file://,filelist://,geojsonl://,git://,repo:// (default "repo://")
+    	A valid whosonfirst/go-whosonfirst-iterate/v2 URI. Supported emitter URI schemes are: directory://,featurecollection://,file://,filelist://,geojsonl://,git://,null://,repo:// (default "repo://")
   -live-hard-die-fast
     	Enable various performance-related pragmas at the expense of possible (unlikely) database corruption (default true)
-  -mode string
-    	A valid whosonfirst/go-whosonfirst-iterate/emitter URI. Supported emitter URI schemes are: directory://,featurecollection://,file://,filelist://,geojsonl://,git://,repo://. THIS FLAG IS DEPRECATED, please use -iterator-uri instead. (default "repo://")
   -names
     	Index the 'names' table
   -optimize
     	Attempt to optimize the database before closing connection (default true)
   -processes int
-    	The number of concurrent processes to index data with (default 16)
+    	The number of concurrent processes to index data with (default 8)
   -properties
     	Index the 'properties' table
   -rtree
     	Index the 'rtree' table
   -search
     	Index the 'search' table (using SQLite FTS4 full-text indexer)
+  -spatial-tables
+    	If true then index the necessary tables for use with the whosonfirst/go-whosonfirst-spatial-sqlite package.
   -spr
     	Index the 'spr' table
   -strict-alt-files
@@ -76,7 +71,7 @@ For example:
 
 ```
 $> ./bin/wof-sqlite-index-features \
-	-dsn microhoods.db \
+	-database-uri modernc://cwd/microhoods.db \
 	-all \
 	-iterator-uri 'repo://?include=properties.wof:placetype=microhood' \
 	/usr/local/data/whosonfirst-data-admin-us
@@ -104,7 +99,7 @@ do
 	rm /usr/local/data/whosonfirst-sqlite/${FNAME}.db
     fi
 
-    ./bin/wof-sqlite-index-features -timings -all -dsn /usr/local/data/whosonfirst-sqlite/${FNAME}-latest.db -mode repo:// ${REPO} 
+    ./bin/wof-sqlite-index-features -timings -all -database-uri modernc:///usr/local/data/whosonfirst-sqlite/${FNAME}-latest.db -iterator-uri repo:// ${REPO} 
 
 done
 ```    
@@ -124,7 +119,7 @@ For example:
 ```
 $> ./bin/wof-sqlite-index-features \
 	-all \
-	-dsn ca-region.db \
+	-database-uri modernc://cwd/ca-region.db \
 	-iterator-uri 'repo://?include=properties.wof:placetype=region' \	
 	/usr/local/data/whosonfirst-data-admin-ca
 
@@ -153,7 +148,7 @@ You can pass multiple query parameters. For example:
 ```
 $> ./bin/wof-sqlite-index-features \
 	-all \
-	-dsn ca-region.db \
+	-database-uri modernc://cwd/ca-region.db \
 	-iterator-uri 'repo://?include=properties.wof:placetype=region&include=properties.wof:name=(?i)new.*' \	
 	/usr/local/data/whosonfirst-data-admin-ca
 
@@ -187,62 +182,9 @@ $> ./bin/wof-sqlite-index-features \
 	-spr \
 	-properties \
 	-timings \
-	-dsn /usr/local/ca-alt.db \
+	-database-uri modernc:///usr/local/ca-alt.db \
 	/usr/local/data/whosonfirst-data-admin-ca/
 ```
-
-### Spatialite
-
-Spatial indexes are also available if you have the [Spatialite extension](https://www.gaia-gis.it/fossil/libspatialite/index) installed and have indexed the `geometries` table. For example:
-
-```
-$> ./bin/wof-sqlite-index-features \
-	-driver spatialite \
-	-timings \
-	-spr \
-	-geometries \
-	-dsn test.db /usr/local/data/whosonfirst-data-constituency-ca/
-
-10:09:46.534281 [wof-sqlite-index-features] STATUS time to index geometries (87) : 21.251828704s
-10:09:46.534379 [wof-sqlite-index-features] STATUS time to index spr (87) : 3.206930799s
-10:09:46.534385 [wof-sqlite-index-features] STATUS time to index all (87) : 24.48004637s
-
-$> sqlite3 test.db
-SQLite version 3.21.0 2017-10-24 18:55:49
-Enter ".help" for usage hints.
-
-sqlite> SELECT load_extension('mod_spatialite.dylib');
-sqlite> SELECT s.id, s.name FROM spr s, geometries g WHERE ST_Intersects(g.geom, GeomFromText('POINT(-122.229137 49.450129)', 4326)) AND g.id = s.id;
-1108962831|Maple Ridge-Pitt Meadows
-```
-
-Or:
-
-```
-> spatialite whosonfirst-data-latest.db
-SpatiaLite version ..: 4.1.1	Supported Extensions:
-...spatialite chatter goes here...
-SQLite version 3.8.2 2013-12-06 14:53:30
-Enter ".help" for instructions
-Enter SQL statements terminated with a ";
-
-spatialite> SELECT s.id, s.name FROM spr AS s, geometries AS g1, geometries AS g2 WHERE g1.id =  85834637 AND s.placetype = 'neighbourhood' AND g2.id = s.id AND ST_Touches(g1.geom, g2.geom) AND g2.ROWID IN (SELECT ROWID FROM SpatialIndex WHERE f_table_name = 'geometries' AND search_frame=g2.geom);
-102112179|La Lengua
-1108831803|Showplace Square
-
-spatialite> SELECT s.id, s.name FROM spr AS s, geometries AS g1, geometries AS g2 WHERE g1.id != g2.id AND g1.id =  85865959 AND s.placetype = 'neighbourhood' AND s.is_current=1 AND g2.id = s.id AND (ST_Touches(g1.geom, g2.geom) OR ST_Intersects(g1.geom, g2.geom)) AND g2.ROWID IN (SELECT ROWID FROM SpatialIndex WHERE f_table_name = 'geometries' AND search_frame=g2.geom);
-1108831807|Fairmount
-85814471|Diamond Heights
-85869221|Eureka Valley
-
-SELECT s.id, s.name, s.is_current FROM spr AS s, geometries AS g1, geometries AS g2 WHERE g1.id != g2.id AND g1.id =  102061079 AND s.placetype = 'neighbourhood' AND g2.id = s.id AND (ST_Touches(g1.geom, g2.geom) OR ST_Intersects(g1.geom, g2.geom)) AND g2.ROWID IN (SELECT ROWID FROM SpatialIndex WHERE f_table_name = 'geometries' AND search_frame=g2.geom);
-85892915|BoCoCa|0
-85869125|Boerum Hill|1
-420782915|Carroll Gardens|1
-85865587|Gowanus|1
-```
-
-_Remember: When indexing geometries you will need to explcitly pass both the `-geometries` and `-driver spatialite` flags, even if you are already passing in the `-all` flag. This is so `-all` will continue to work as expected for people who don't have Spatialite installed on their computer._
 
 ## Indexing 
 
@@ -253,7 +195,7 @@ $> ./bin/wof-sqlite-index-features \
 	-driver spatialite \
 	-all \
 	-geometries \
-	-dsn /usr/local/data/dist/sqlite/whosonfirst-data-latest.db \
+	-database-uri modernc:///usr/local/data/dist/sqlite/whosonfirst-data-latest.db \
 	-timings \
 	/usr/local/data/whosonfirst-data
 
@@ -275,7 +217,7 @@ And without:
 ```
 $> ./bin/wof-sqlite-index-features \
 	-all \
-	-dsn /usr/local/data/dist/sqlite/whosonfirst-data-latest-nospatial.db \
+	-database-uri modernc:///usr/local/data/dist/sqlite/whosonfirst-data-latest-nospatial.db \
 	-timings \
 	/usr/local/data/whosonfirst-data
 ...time passes...
@@ -295,6 +237,7 @@ As of this writing individual tables are indexed atomically. There may be some i
 ## See also
 
 * https://github.com/aaronland/go-sqlite
+* https://github.com/aaronland/go-sqlite-modernc
 * https://github.com/whosonfirst/go-whosonfirst-sqlite-features
 * https://github.com/whosonfirst/go-whosonfirst-sqlite-index
-* https://github.com/whosonfirst/go-whosonfirst-iterate/v2
+* https://github.com/whosonfirst/go-whosonfirst-iterate

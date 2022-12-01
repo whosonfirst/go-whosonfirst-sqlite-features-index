@@ -3,13 +3,14 @@ package index
 import (
 	"context"
 	"fmt"
-	"github.com/aaronland/go-sqlite"
+	_ "github.com/aaronland/go-sqlite-modernc"
+	"github.com/aaronland/go-sqlite/v2"
 	"github.com/tidwall/gjson"
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-whosonfirst-feature/geometry"
 	"github.com/whosonfirst/go-whosonfirst-feature/properties"
-	wof_tables "github.com/whosonfirst/go-whosonfirst-sqlite-features/tables"
-	sql_index "github.com/whosonfirst/go-whosonfirst-sqlite-index/v3"
+	wof_tables "github.com/whosonfirst/go-whosonfirst-sqlite-features/v2/tables"
+	sql_index "github.com/whosonfirst/go-whosonfirst-sqlite-index/v4"
 	"github.com/whosonfirst/go-whosonfirst-uri"
 	"io"
 	"log"
@@ -93,7 +94,7 @@ func SQLiteFeaturesIndexRelationsFuncWithOptions(opts *SQLiteFeaturesIndexRelati
 			return fmt.Errorf("Failed to create new GeoJSON table, %w", err)
 		}
 
-		conn, err := db.Conn()
+		conn, err := db.Conn(ctx)
 
 		if err != nil {
 			return fmt.Errorf("Failed to establish database connection, %v", err)
