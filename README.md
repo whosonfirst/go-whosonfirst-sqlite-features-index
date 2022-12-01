@@ -240,4 +240,4 @@ As of this writing individual tables are indexed atomically. There may be some i
 * https://github.com/aaronland/go-sqlite-modernc
 * https://github.com/whosonfirst/go-whosonfirst-sqlite-features
 * https://github.com/whosonfirst/go-whosonfirst-sqlite-index
-* https://github.com/whosonfirst/go-whosonfirst-iterate/v2
+* https://github.com/whosonfirst/go-whosonfirst-iterate
