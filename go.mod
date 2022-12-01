@@ -1,10 +1,11 @@
-module github.com/whosonfirst/go-whosonfirst-sqlite-features-index
+module github.com/whosonfirst/go-whosonfirst-sqlite-features-index/v2
 
 go 1.18
 
 require (
 	github.com/aaronland/go-sqlite-modernc v0.0.1
 	github.com/aaronland/go-sqlite/v2 v2.2.0
+	github.com/sfomuseum/go-flags v0.7.0
 	github.com/tidwall/gjson v1.14.4
 	github.com/whosonfirst/go-reader v1.0.2
 	github.com/whosonfirst/go-reader-http v0.3.1
