@@ -22,6 +22,6 @@ func main() {
 	err := index.Run(ctx, logger)
 
 	if err != nil {
-		logger.Fatal("Failed to index, %v", err)
+		logger.Fatalf("Failed to index, %v", err)
 	}
 }
