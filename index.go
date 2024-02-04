@@ -3,6 +3,10 @@ package index
 import (
 	"context"
 	"fmt"
+	"io"
+	"log"
+	"sync"
+
 	_ "github.com/aaronland/go-sqlite-modernc"
 	"github.com/aaronland/go-sqlite/v2"
 	"github.com/tidwall/gjson"
@@ -12,9 +16,6 @@ import (
 	wof_tables "github.com/whosonfirst/go-whosonfirst-sqlite-features/v2/tables"
 	sql_index "github.com/whosonfirst/go-whosonfirst-sqlite-index/v4"
 	"github.com/whosonfirst/go-whosonfirst-uri"
-	"io"
-	"log"
-	"sync"
 )
 
 // SQLiteFeaturesLoadRecordFuncOptions is a struct to define options when loading Who's On First feature records.

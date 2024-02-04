@@ -3,10 +3,11 @@ package index
 import (
 	"flag"
 	"fmt"
-	"github.com/sfomuseum/go-flags/flagset"
-	"github.com/whosonfirst/go-whosonfirst-iterate/v2/emitter"
 	"runtime"
 	"strings"
+
+	"github.com/sfomuseum/go-flags/flagset"
+	"github.com/whosonfirst/go-whosonfirst-iterate/v2/emitter"
 )
 
 var iterator_uri string

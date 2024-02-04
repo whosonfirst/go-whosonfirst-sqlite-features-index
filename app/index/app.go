@@ -4,14 +4,15 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"log"
+	"runtime"
+
 	"github.com/aaronland/go-sqlite/v2"
 	"github.com/sfomuseum/go-flags/flagset"
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-whosonfirst-sqlite-features-index/v2"
 	"github.com/whosonfirst/go-whosonfirst-sqlite-features/v2/tables"
 	sql_index "github.com/whosonfirst/go-whosonfirst-sqlite-index/v4"
-	"log"
-	"runtime"
 )
 
 func Run(ctx context.Context, logger *log.Logger) error {

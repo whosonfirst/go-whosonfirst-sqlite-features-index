@@ -10,8 +10,9 @@ import (
 
 import (
 	"context"
-	"github.com/whosonfirst/go-whosonfirst-sqlite-features-index/v2/app/index"
 	"log"
+
+	"github.com/whosonfirst/go-whosonfirst-sqlite-features-index/v2/app/index"
 )
 
 func main() {

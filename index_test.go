@@ -3,12 +3,13 @@ package index
 import (
 	"context"
 	"fmt"
+	"path/filepath"
+	"testing"
+
 	"github.com/aaronland/go-sqlite/v2"
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-whosonfirst-sqlite-features/v2/tables"
 	sql_index "github.com/whosonfirst/go-whosonfirst-sqlite-index/v4"
-	"path/filepath"
-	"testing"
 )
 
 func TestIndexFeatures(t *testing.T) {
