@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/sfomuseum/go-flags/flagset"
+	"github.com/sfomuseum/go-flags/multi"
 	"github.com/whosonfirst/go-whosonfirst-iterate/v2/emitter"
 )
 
@@ -33,6 +34,8 @@ var optimize bool
 
 var alt_files bool
 var strict_alt_files bool
+
+var index_alt multi.MultiString
 
 var index_relations bool
 var relations_uri string
@@ -68,7 +71,9 @@ func DefaultFlagSet() *flag.FlagSet {
 	fs.BoolVar(&timings, "timings", false, "Display timings during and after indexing")
 	fs.BoolVar(&optimize, "optimize", true, "Attempt to optimize the database before closing connection")
 
-	fs.BoolVar(&alt_files, "index-alt-files", false, "Index alt geometries")
+	fs.BoolVar(&alt_files, "index-alt-files", false, "Index alt geometries. This flag is deprecated, please use -index-alt=TABLE,TABLE,etc. instead. To index alt geometries in all the applicable tables use -index-alt=*")
+	fs.Var(&index_alt, "index-alt", "Zero or more table names where alt geometry files should be indexed.")
+
 	fs.BoolVar(&strict_alt_files, "strict-alt-files", true, "Be strict when indexing alt geometries")
 
 	fs.BoolVar(&index_relations, "index-relations", false, "Index the records related to a feature, specifically wof:belongsto, wof:depicts and wof:involves. Alt files for relations are not indexed at this time.")

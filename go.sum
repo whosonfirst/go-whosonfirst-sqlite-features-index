@@ -111,8 +111,8 @@ github.com/stretchr/testify v1.4.0/go.mod h1:j7eGeouHqKxXV5pUuKE4zz7dFj8WfuZ+81P
 github.com/stretchr/testify v1.6.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcUk=
 github.com/stretchr/testify v1.8.4/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXlSw2iwfAo=
-github.com/tidwall/gjson v1.17.0 h1:/Jocvlh98kcTfpN2+JzGQWQcqrPQwDrVEMApx/M5ZwM=
-github.com/tidwall/gjson v1.17.0/go.mod h1:/wbyibRr2FHMks5tjHJ5F8dMZh3AcwJEMf5vlfC0lxk=
+github.com/tidwall/gjson v1.17.1 h1:wlYEnwqAHgzmhNUFfw7Xalt2JzQvsMx2Se4PcoFCT/U=
+github.com/tidwall/gjson v1.17.1/go.mod h1:/wbyibRr2FHMks5tjHJ5F8dMZh3AcwJEMf5vlfC0lxk=
 github.com/tidwall/match v1.1.1 h1:+Ho715JplO36QYgwN9PGYNhgZvoUSc9X2c80KVTi+GA=
 github.com/tidwall/match v1.1.1/go.mod h1:eRSPERbgtNPcGhD8UCthc6PmLEQXEWd3PRB5JTxsfmM=
 github.com/tidwall/pretty v1.0.0/go.mod h1:XNkn88O1ChpSDQmQeStsy+sBenx6DDtFZJxhVysOjyk=
@@ -143,10 +143,10 @@ github.com/whosonfirst/go-whosonfirst-sources v0.1.0 h1:JuKLa6KWke22jBfJ1pM9WQHo
 github.com/whosonfirst/go-whosonfirst-sources v0.1.0/go.mod h1:EUMHyGzUmqPPxlMmOp+28BFeoBdxxE0HCKRd67lkqGM=
 github.com/whosonfirst/go-whosonfirst-spr/v2 v2.3.7 h1:1j4IMuVua4/NhqKm2ke16h2V5Z2XiLoOdXbjDrfZb0E=
 github.com/whosonfirst/go-whosonfirst-spr/v2 v2.3.7/go.mod h1:I2IqsIutlDrvYp37Xzwk4WGq+m/gLh+gEifiLmH0bac=
-github.com/whosonfirst/go-whosonfirst-sql v0.0.2 h1:YkGkDxgeZiu4lhWFu4I/2f9uczgmwpW4wNV67xoRKAo=
-github.com/whosonfirst/go-whosonfirst-sql v0.0.2/go.mod h1:sQXkJTPfnxXbOPTCCxGjUydfQqATfEyO4xyxj2pEX3E=
-github.com/whosonfirst/go-whosonfirst-sqlite-features/v2 v2.0.2 h1:ppfP8QKV6LMxnTeHgGE2ObJ+Txh99cHXjakDi0ohqHQ=
-github.com/whosonfirst/go-whosonfirst-sqlite-features/v2 v2.0.2/go.mod h1:8QuXkCVjJ1wrCESwF2Rr3PvN/4yD6Zkw4QWLSdEesmg=
+github.com/whosonfirst/go-whosonfirst-sql v0.0.3 h1:yyAdKO8bjuhnFsV0HHeAprd7HExpZo54/7K2+10kHSg=
+github.com/whosonfirst/go-whosonfirst-sql v0.0.3/go.mod h1:sQXkJTPfnxXbOPTCCxGjUydfQqATfEyO4xyxj2pEX3E=
+github.com/whosonfirst/go-whosonfirst-sqlite-features/v2 v2.0.3 h1:tDt4MkomZKljI7Q8IYbB7L2XfKy69Y73/qJL/BzbzyY=
+github.com/whosonfirst/go-whosonfirst-sqlite-features/v2 v2.0.3/go.mod h1:TUDGyZW2nIWZ4gB7nJ0eTt0+p8izYXhyhoiOf1fOFFY=
 github.com/whosonfirst/go-whosonfirst-sqlite-index/v4 v4.0.0 h1:JEDFIFN7bgQJTDAE1Bc0dYbnWUKF4M8Vsjr4AxsqI/A=
 github.com/whosonfirst/go-whosonfirst-sqlite-index/v4 v4.0.0/go.mod h1:ZM85QUfMKGRywkWmsT3SfmzMG2vKEzPmQdj3II08IGU=
 github.com/whosonfirst/go-whosonfirst-uri v1.3.0 h1:LYOVLqP9rWQxauYVkdw65j5LZxEi8OK0GHh/qCEpX4g=

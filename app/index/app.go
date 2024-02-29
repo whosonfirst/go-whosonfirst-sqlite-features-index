@@ -6,19 +6,25 @@ import (
 	"fmt"
 	"log"
 	"runtime"
+	"slices"
 
 	"github.com/aaronland/go-sqlite/v2"
 	"github.com/sfomuseum/go-flags/flagset"
 	"github.com/whosonfirst/go-reader"
+	sql_tables "github.com/whosonfirst/go-whosonfirst-sql/tables"
 	"github.com/whosonfirst/go-whosonfirst-sqlite-features-index/v2"
 	"github.com/whosonfirst/go-whosonfirst-sqlite-features/v2/tables"
 	sql_index "github.com/whosonfirst/go-whosonfirst-sqlite-index/v4"
 )
 
+const index_alt_all string = "*"
+
 func Run(ctx context.Context, logger *log.Logger) error {
 	fs := DefaultFlagSet()
 	return RunWithFlagSet(ctx, fs, logger)
 }
+
+// To do: Add RunWithOptions...
 
 func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) error {
 
@@ -63,7 +69,6 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		}()
 
 	} else {
-
 		defer db.Close(ctx)
 	}
 
@@ -83,15 +88,19 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		geojson_opts, err := tables.DefaultGeoJSONTableOptions()
 
 		if err != nil {
-			return fmt.Errorf("failed to create 'geojson' table options because %s", err)
+			return fmt.Errorf("failed to create '%s' table options because %s", sql_tables.GEOJSON_TABLE_NAME, err)
 		}
 
-		geojson_opts.IndexAltFiles = alt_files
+		// alt_files is deprecated (20240229/straup)
+
+		if alt_files || slices.Contains(index_alt, sql_tables.GEOJSON_TABLE_NAME) || slices.Contains(index_alt, index_alt_all) {
+			geojson_opts.IndexAltFiles = true
+		}
 
 		gt, err := tables.NewGeoJSONTableWithDatabaseAndOptions(ctx, db, geojson_opts)
 
 		if err != nil {
-			return fmt.Errorf("failed to create 'geojson' table because %s", err)
+			return fmt.Errorf("failed to create '%s' table because %s", sql_tables.GEOJSON_TABLE_NAME, err)
 		}
 
 		to_index = append(to_index, gt)
@@ -102,7 +111,7 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		t, err := tables.NewSupersedesTableWithDatabase(ctx, db)
 
 		if err != nil {
-			return fmt.Errorf("failed to create 'supersedes' table because %s", err)
+			return fmt.Errorf("failed to create '%s' table because %s", sql_tables.SUPERSEDES_TABLE_NAME, err)
 		}
 
 		to_index = append(to_index, t)
@@ -116,7 +125,11 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 			return fmt.Errorf("failed to create 'rtree' table options because %s", err)
 		}
 
-		rtree_opts.IndexAltFiles = alt_files
+		// alt_files is deprecated (20240229/straup)
+
+		if alt_files || slices.Contains(index_alt, sql_tables.RTREE_TABLE_NAME) || slices.Contains(index_alt, index_alt_all) {
+			rtree_opts.IndexAltFiles = true
+		}
 
 		gt, err := tables.NewRTreeTableWithDatabaseAndOptions(ctx, db, rtree_opts)
 
@@ -135,7 +148,11 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 			return fmt.Errorf("failed to create 'properties' table options because %s", err)
 		}
 
-		properties_opts.IndexAltFiles = alt_files
+		// alt_files is deprecated (20240229/straup)
+
+		if alt_files || slices.Contains(index_alt, sql_tables.PROPERTIES_TABLE_NAME) || slices.Contains(index_alt, index_alt_all) {
+			properties_opts.IndexAltFiles = true
+		}
 
 		gt, err := tables.NewPropertiesTableWithDatabaseAndOptions(ctx, db, properties_opts)
 
@@ -151,15 +168,19 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		spr_opts, err := tables.DefaultSPRTableOptions()
 
 		if err != nil {
-			return fmt.Errorf("Failed to create 'spr' table options because %v", err)
+			return fmt.Errorf("Failed to create '%s' table options because %v", sql_tables.SPR_TABLE_NAME, err)
 		}
 
-		spr_opts.IndexAltFiles = alt_files
+		// alt_files is deprecated (20240229/straup)
+
+		if alt_files || slices.Contains(index_alt, sql_tables.SPR_TABLE_NAME) || slices.Contains(index_alt, index_alt_all) {
+			spr_opts.IndexAltFiles = true
+		}
 
 		st, err := tables.NewSPRTableWithDatabaseAndOptions(ctx, db, spr_opts)
 
 		if err != nil {
-			return fmt.Errorf("failed to create 'spr' table because %s", err)
+			return fmt.Errorf("failed to create '%s' table because %s", sql_tables.SPR_TABLE_NAME, err)
 		}
 
 		to_index = append(to_index, st)
@@ -170,7 +191,7 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		nm, err := tables.NewNamesTableWithDatabase(ctx, db)
 
 		if err != nil {
-			return fmt.Errorf("failed to create 'names' table because %s", err)
+			return fmt.Errorf("failed to create '%s' table because %s", sql_tables.NAMES_TABLE_NAME, err)
 		}
 
 		to_index = append(to_index, nm)
@@ -181,7 +202,7 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		an, err := tables.NewAncestorsTableWithDatabase(ctx, db)
 
 		if err != nil {
-			return fmt.Errorf("failed to create 'ancestors' table because %s", err)
+			return fmt.Errorf("failed to create '%s' table because %s", sql_tables.ANCESTORS_TABLE_NAME, err)
 		}
 
 		to_index = append(to_index, an)
@@ -192,7 +213,7 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		cn, err := tables.NewConcordancesTableWithDatabase(ctx, db)
 
 		if err != nil {
-			return fmt.Errorf("failed to create 'concordances' table because %s", err)
+			return fmt.Errorf("failed to create '%s' table because %s", sql_tables.CONCORDANCES_TABLE_NAME, err)
 		}
 
 		to_index = append(to_index, cn)
@@ -206,15 +227,19 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		geometries_opts, err := tables.DefaultGeometriesTableOptions()
 
 		if err != nil {
-			return fmt.Errorf("failed to create 'geometries' table options because %v", err)
+			return fmt.Errorf("failed to create '%s' table options because %v", sql_tables.GEOMETRIES_TABLE_NAME, err)
 		}
 
-		geometries_opts.IndexAltFiles = alt_files
+		// alt_files is deprecated (20240229/straup)
+
+		if alt_files || slices.Contains(index_alt, sql_tables.CONCORDANCES_TABLE_NAME) || slices.Contains(index_alt, index_alt_all) {
+			geometries_opts.IndexAltFiles = true
+		}
 
 		gm, err := tables.NewGeometriesTableWithDatabaseAndOptions(ctx, db, geometries_opts)
 
 		if err != nil {
-			return fmt.Errorf("failed to create 'geometries' table because %v", err)
+			return fmt.Errorf("failed to create '%s' table because %v", sql_tables.CONCORDANCES_TABLE_NAME, err)
 		}
 
 		to_index = append(to_index, gm)
@@ -225,6 +250,8 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 	// anyway... (20180214/thisisaaronland)
 
 	if search {
+
+		// ALT FILES...
 
 		st, err := tables.NewSearchTableWithDatabase(ctx, db)
 
