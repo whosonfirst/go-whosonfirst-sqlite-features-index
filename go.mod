@@ -1,19 +1,20 @@
 module github.com/whosonfirst/go-whosonfirst-sqlite-features-index/v2
 
-go 1.21.3
+go 1.22
 
 require (
 	github.com/aaronland/go-sqlite-mattn v0.0.3
 	github.com/aaronland/go-sqlite-modernc v0.0.3
 	github.com/aaronland/go-sqlite/v2 v2.2.0
 	github.com/sfomuseum/go-flags v0.10.0
-	github.com/tidwall/gjson v1.17.0
+	github.com/tidwall/gjson v1.17.1
 	github.com/whosonfirst/go-reader v1.0.2
 	github.com/whosonfirst/go-reader-http v0.3.1
 	github.com/whosonfirst/go-whosonfirst-feature v0.0.27
 	github.com/whosonfirst/go-whosonfirst-iterate-git/v2 v2.1.4
 	github.com/whosonfirst/go-whosonfirst-iterate/v2 v2.3.4
-	github.com/whosonfirst/go-whosonfirst-sqlite-features/v2 v2.0.2
+	github.com/whosonfirst/go-whosonfirst-sql v0.0.3
+	github.com/whosonfirst/go-whosonfirst-sqlite-features/v2 v2.0.3
 	github.com/whosonfirst/go-whosonfirst-sqlite-index/v4 v4.0.0
 	github.com/whosonfirst/go-whosonfirst-uri v1.3.0
 )
@@ -55,7 +56,6 @@ require (
 	github.com/whosonfirst/go-whosonfirst-names v0.1.0 // indirect
 	github.com/whosonfirst/go-whosonfirst-sources v0.1.0 // indirect
 	github.com/whosonfirst/go-whosonfirst-spr/v2 v2.3.7 // indirect
-	github.com/whosonfirst/go-whosonfirst-sql v0.0.2 // indirect
 	github.com/whosonfirst/walk v0.0.2 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
 	go.mongodb.org/mongo-driver v1.11.4 // indirect

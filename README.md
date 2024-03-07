@@ -33,8 +33,10 @@ $> ./bin/wof-sqlite-index-features -h
     	Index the 'geojson' table
   -geometries
     	Index the 'geometries' table (requires that libspatialite already be installed)
+  -index-alt value
+    	Zero or more table names where alt geometry files should be indexed.
   -index-alt-files
-    	Index alt geometries
+    	Index alt geometries. This flag is deprecated, please use -index-alt=TABLE,TABLE,etc. instead. To index alt geometries in all the applicable tables use -index-alt=*
   -index-relations
     	Index the records related to a feature, specifically wof:belongsto, wof:depicts and wof:involves. Alt files for relations are not indexed at this time.
   -index-relations-reader-uri string
@@ -48,7 +50,7 @@ $> ./bin/wof-sqlite-index-features -h
   -optimize
     	Attempt to optimize the database before closing connection (default true)
   -processes int
-    	The number of concurrent processes to index data with (default 8)
+    	The number of concurrent processes to index data with (default 16)
   -properties
     	Index the 'properties' table
   -rtree
@@ -57,6 +59,8 @@ $> ./bin/wof-sqlite-index-features -h
     	Index the 'search' table (using SQLite FTS4 full-text indexer)
   -spatial-tables
     	If true then index the necessary tables for use with the whosonfirst/go-whosonfirst-spatial-sqlite package.
+  -spelunker-tables
+    	If true then index the necessary tables for use with the whosonfirst/go-whosonfirst-spelunker packages
   -spr
     	Index the 'spr' table
   -strict-alt-files

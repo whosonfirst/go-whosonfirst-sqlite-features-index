@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
+	"log/slog"
 	"sync"
 
 	_ "github.com/aaronland/go-sqlite-modernc"
@@ -175,7 +175,7 @@ func SQLiteFeaturesIndexRelationsFuncWithOptions(opts *SQLiteFeaturesIndexRelati
 					return fmt.Errorf("Failed to open %s, %v", rel_path, err)
 				}
 
-				log.Printf("Failed to read '%s' because '%v'. Strict mode is disabled so skipping\n", rel_path, err)
+				slog.Debug("Failed to read '%s' because '%v'. Strict mode is disabled so skipping\n", rel_path, err)
 				continue
 			}
 
