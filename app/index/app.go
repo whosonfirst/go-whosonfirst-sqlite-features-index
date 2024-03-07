@@ -39,6 +39,15 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		spr = true
 	}
 
+	if spelunker_tables {
+		rtree = true
+		spr = true
+		geojson = true
+		concordances = true
+		ancestors = true
+		search = true
+	}
+	
 	db, err := sqlite.NewDatabase(ctx, db_uri)
 
 	if err != nil {

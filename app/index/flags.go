@@ -26,7 +26,9 @@ var properties bool
 var search bool
 var spr bool
 var supersedes bool
+
 var spatial_tables bool
+var spelunker_tables bool
 
 var live_hard bool
 var timings bool
@@ -66,6 +68,7 @@ func DefaultFlagSet() *flag.FlagSet {
 	fs.BoolVar(&supersedes, "supersedes", false, "Index the 'supersedes' table")
 
 	fs.BoolVar(&spatial_tables, "spatial-tables", false, "If true then index the necessary tables for use with the whosonfirst/go-whosonfirst-spatial-sqlite package.")
+	fs.BoolVar(&spelunker_tables, "spelunker-tables", false, "If true then index the necessary tables for use with the whosonfirst/go-whosonfirst-spelunker packages")	
 
 	fs.BoolVar(&live_hard, "live-hard-die-fast", true, "Enable various performance-related pragmas at the expense of possible (unlikely) database corruption")
 	fs.BoolVar(&timings, "timings", false, "Display timings during and after indexing")
