@@ -42,12 +42,13 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 	if spelunker_tables {
 		rtree = true
 		spr = true
+		spelunker = true
 		geojson = true
 		concordances = true
 		ancestors = true
 		search = true
 	}
-	
+
 	db, err := sqlite.NewDatabase(ctx, db_uri)
 
 	if err != nil {
@@ -190,6 +191,23 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 		if err != nil {
 			return fmt.Errorf("failed to create '%s' table because %s", sql_tables.SPR_TABLE_NAME, err)
+		}
+
+		to_index = append(to_index, st)
+	}
+
+	if spelunker || all {
+
+		spelunker_opts, err := tables.DefaultSpelunkerTableOptions()
+
+		if err != nil {
+			return fmt.Errorf("Failed to create '%s' table options because %v", sql_tables.SPELUNKER_TABLE_NAME, err)
+		}
+
+		st, err := tables.NewSpelunkerTableWithDatabaseAndOptions(ctx, db, spelunker_opts)
+
+		if err != nil {
+			return fmt.Errorf("failed to create '%s' table because %s", sql_tables.SPELUNKER_TABLE_NAME, err)
 		}
 
 		to_index = append(to_index, st)
