@@ -8,7 +8,7 @@ github.com/Microsoft/go-winio/internal/fs
 github.com/Microsoft/go-winio/internal/socket
 github.com/Microsoft/go-winio/internal/stringbuffer
 github.com/Microsoft/go-winio/pkg/guid
-# github.com/ProtonMail/go-crypto v0.0.0-20230828082145-3c4c8a2d2371
+# github.com/ProtonMail/go-crypto v1.0.0
 ## explicit; go 1.13
 github.com/ProtonMail/go-crypto/bitcurves
 github.com/ProtonMail/go-crypto/brainpool
@@ -44,7 +44,7 @@ github.com/aaronland/go-sqlite-modernc
 ## explicit; go 1.18
 github.com/aaronland/go-sqlite/v2
 github.com/aaronland/go-sqlite/v2/database
-# github.com/cloudflare/circl v1.3.3
+# github.com/cloudflare/circl v1.3.7
 ## explicit; go 1.19
 github.com/cloudflare/circl/dh/x25519
 github.com/cloudflare/circl/dh/x448
@@ -86,7 +86,7 @@ github.com/go-git/go-billy/v5/helper/polyfill
 github.com/go-git/go-billy/v5/memfs
 github.com/go-git/go-billy/v5/osfs
 github.com/go-git/go-billy/v5/util
-# github.com/go-git/go-git/v5 v5.11.0
+# github.com/go-git/go-git/v5 v5.12.0
 ## explicit; go 1.19
 github.com/go-git/go-git/v5
 github.com/go-git/go-git/v5/config
@@ -174,8 +174,8 @@ github.com/pjbgf/sha1cd/ubc
 # github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec
 ## explicit; go 1.12
 github.com/remyoudompheng/bigfft
-# github.com/sergi/go-diff v1.1.0
-## explicit; go 1.12
+# github.com/sergi/go-diff v1.3.2-0.20230802210424-5b0b94c5c0d3
+## explicit; go 1.13
 github.com/sergi/go-diff/diffmatchpatch
 # github.com/sfomuseum/go-edtf v1.1.1
 ## explicit; go 1.12
@@ -192,7 +192,7 @@ github.com/sfomuseum/go-edtf/tests
 ## explicit; go 1.16
 github.com/sfomuseum/go-flags/flagset
 github.com/sfomuseum/go-flags/multi
-# github.com/skeema/knownhosts v1.2.1
+# github.com/skeema/knownhosts v1.2.2
 ## explicit; go 1.17
 github.com/skeema/knownhosts
 # github.com/tidwall/gjson v1.17.1
@@ -228,10 +228,10 @@ github.com/whosonfirst/go-whosonfirst-feature/properties
 ## explicit; go 1.18
 github.com/whosonfirst/go-whosonfirst-flags
 github.com/whosonfirst/go-whosonfirst-flags/existential
-# github.com/whosonfirst/go-whosonfirst-iterate-git/v2 v2.1.4
-## explicit; go 1.18
+# github.com/whosonfirst/go-whosonfirst-iterate-git/v2 v2.1.6
+## explicit; go 1.22
 github.com/whosonfirst/go-whosonfirst-iterate-git/v2
-# github.com/whosonfirst/go-whosonfirst-iterate/v2 v2.3.4
+# github.com/whosonfirst/go-whosonfirst-iterate/v2 v2.4.1
 ## explicit; go 1.18
 github.com/whosonfirst/go-whosonfirst-iterate/v2/emitter
 github.com/whosonfirst/go-whosonfirst-iterate/v2/filters
@@ -247,7 +247,7 @@ github.com/whosonfirst/go-whosonfirst-sources/sources
 # github.com/whosonfirst/go-whosonfirst-spr/v2 v2.3.7
 ## explicit; go 1.18
 github.com/whosonfirst/go-whosonfirst-spr/v2
-# github.com/whosonfirst/go-whosonfirst-sql v0.0.3
+# github.com/whosonfirst/go-whosonfirst-sql v0.0.4
 ## explicit; go 1.21.3
 github.com/whosonfirst/go-whosonfirst-sql/tables
 # github.com/whosonfirst/go-whosonfirst-sqlite-features/v2 v2.0.3
@@ -295,7 +295,7 @@ golang.org/x/crypto/ssh/knownhosts
 # golang.org/x/mod v0.12.0
 ## explicit; go 1.17
 golang.org/x/mod/semver
-# golang.org/x/net v0.23.0
+# golang.org/x/net v0.22.0
 ## explicit; go 1.18
 golang.org/x/net/context
 golang.org/x/net/internal/socks
