@@ -40,7 +40,7 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 	}
 
 	if spelunker_tables {
-		rtree = true
+		// rtree = true
 		spr = true
 		spelunker = true
 		geojson = true
@@ -50,7 +50,7 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 		to_index_alt := []string{
 			sql_tables.GEOJSON_TABLE_NAME,
-			sql_tables.SPELUNKER_TABLE_NAME,
+			// sql_tables.SPELUNKER_TABLE_NAME,
 		}
 
 		for _, table_name := range to_index_alt {
