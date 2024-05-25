@@ -47,6 +47,19 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		concordances = true
 		ancestors = true
 		search = true
+
+		to_index_alt := []string{
+			sql_tables.GEOJSON_TABLE_NAME,
+			sql_tables.SPELUNKER_TABLE_NAME,
+		}
+
+		for _, table_name := range to_index_alt {
+
+			if !slices.Contains(index_alt, table_name) {
+				index_alt = append(index_alt, table_name)
+			}
+		}
+
 	}
 
 	db, err := sqlite.NewDatabase(ctx, db_uri)
@@ -202,6 +215,12 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 		if err != nil {
 			return fmt.Errorf("Failed to create '%s' table options because %v", sql_tables.SPELUNKER_TABLE_NAME, err)
+		}
+
+		// alt_files is deprecated (20240229/straup)
+
+		if alt_files || slices.Contains(index_alt, sql_tables.SPELUNKER_TABLE_NAME) || slices.Contains(index_alt, index_alt_all) {
+			spelunker_opts.IndexAltFiles = true
 		}
 
 		st, err := tables.NewSpelunkerTableWithDatabaseAndOptions(ctx, db, spelunker_opts)
