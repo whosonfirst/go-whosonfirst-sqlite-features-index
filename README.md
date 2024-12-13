@@ -6,7 +6,7 @@ The `go-whosonfirst-sqlite-index` package indexes SQLite databases using table c
 
 ## Deprecation notice (December 2024)
 
-This package has been deprecated. It has been superseded by the [whosonfirst/go-whosonfirst-database-sqlite](https://github.com/whosonfirst/go-whosonfirst-database-sqlite?) package. It will be archived in early 2025.
+This package has been deprecated. It has been superseded by the [whosonfirst/go-whosonfirst-database-sqlite](https://github.com/whosonfirst/go-whosonfirst-database-sqlite?) package.
 
 ## Documentation
 
